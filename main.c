@@ -7,12 +7,13 @@ struct node {
     struct node *next;
 };
 struct node *head = NULL;
+
 void print_map();
 void get_coordinates();
 void insert_coordinates();
 
+int row, column;
 int main() {
-    int row, column;
     scanf("%d %d", &row, &column);
     print_map(row, column);
 }
@@ -61,7 +62,11 @@ void get_coordinates(int lenght) {
     scanf("%d", &end_column);
 
     int i ;
-    if(first_row == end_row && (int)(abs(first_column - end_column)) == lenght ){
+    if(fmax(first_row, end_row) > row || fmax(first_column, end_column) > column
+    || fmin(first_row, end_row) < 1 || fmin(first_column, end_column) < 1){
+        get_coordinates(lenght);
+    }
+    else if(first_row == end_row && (int)(abs(first_column - end_column)) == lenght ){
         for(i = (int)fminf(first_column,end_column); i < (int)fmaxf(first_column,end_column); i++){
             insert_coordinates(first_row, i);
         }
