@@ -1,4 +1,4 @@
-**C final project - Battleship **
+**C final project - Battleship**
 
 AUT university 
 
