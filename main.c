@@ -1,9 +1,20 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+struct node {
+    int row, column ;
+    struct node *next;
+};
+struct node *head = NULL;
 void print_map();
+void get_coordinates();
+void insert_coordinates();
+
 int main() {
     int row, column;
     scanf("%d %d", &row, &column);
-    print_map(row,column);
+    print_map(row, column);
 }
 
 void print_map(int row, int column){
@@ -35,4 +46,44 @@ void print_map(int row, int column){
         printf("-\n");
     }
 
+}
+
+void get_coordinates(int lenght) {
+    printf("enter coordinates of %d block lenght ship:\n", lenght);
+    int first_row, first_column, end_row, end_column;
+    printf("enter row number of start point: ");
+    scanf("%d", &first_row);
+    printf("enter column number of start point: ");
+    scanf("%d", &first_column);
+    printf("enter row number of end point: ");
+    scanf("%d", &end_row);
+    printf("enter column number of end point: ");
+    scanf("%d", &end_column);
+
+    int i ;
+    if(first_row == end_row && (int)(abs(first_column - end_column)) == lenght ){
+        for(i = (int)fminf(first_column,end_column); i < (int)fmaxf(first_column,end_column); i++){
+            insert_coordinates(first_row, i);
+        }
+    }
+    else if(first_column == end_column && (int)(abs(first_row - end_row)) == lenght ){
+        for(i = (int)fminf(first_row,end_row); i < (int)fmaxf(first_row,end_row); i++){
+            insert_coordinates(i, first_column);
+        }
+    }
+    else{
+        printf("you entered invalid inputs! :)\nTry Again...\n");
+        get_coordinates(lenght);
+    }
+
+}
+
+void insert_coordinates( int row,int column){
+    struct node *link = (struct node*) malloc(sizeof(struct node));
+
+    link->row = row;
+    link->column = column;
+
+    link->next = head;
+    head = link;
 }
