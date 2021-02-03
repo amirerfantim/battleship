@@ -16,6 +16,7 @@ int row, column;
 int main() {
     scanf("%d %d", &row, &column);
     print_map(row, column);
+    get_coordinates(5);
 }
 
 void print_map(int row, int column){
@@ -64,6 +65,7 @@ void get_coordinates(int lenght) {
     int i ;
     if(fmax(first_row, end_row) > row || fmax(first_column, end_column) > column
     || fmin(first_row, end_row) < 1 || fmin(first_column, end_column) < 1){
+        printf("your input was out of range ! :)\nTry Again...\n");
         get_coordinates(lenght);
     }
     else if(first_row == end_row && (int)(abs(first_column - end_column)) == lenght ){
