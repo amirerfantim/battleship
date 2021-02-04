@@ -39,6 +39,7 @@ int main() {
   // printList(&head2);
   // printList(&head1);
 }
+
 /*
 int check_available_coor(int cte, int first, int end, int hor_or_vert){ // hor =1= horizontal & vert =2= vertical
     int i;
@@ -78,7 +79,7 @@ void get_ship(){
 }
 
 void print_map(int inner_row, int inner_column){
-    int i1, i2, i3, col_counter = 1;
+    int i1, i2, i3, col_counter = 1, j = 0, a[5] = {1,1,1,1,1}, b[5] = {1,2,3,4,5};
     printf("   ");
 
     for(i3 = 0; i3 < 4*inner_column; i3++) {
@@ -90,12 +91,21 @@ void print_map(int inner_row, int inner_column){
         }
     }
 
-    printf("-\n");
+    printf("\n");
+
+    char show_ship ;
 
     for(i1 = 0; i1 < inner_row; i1++){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < inner_column; i2++){
-            printf("|   ");
+            if(a[j] == i1+1 && b[j] == i2+1) {
+                show_ship = 'S';
+                printf("| %c ", show_ship);
+                j++;
+            }
+            else{
+                printf("|   ");
+            }
         }
 
         printf("|\n   ");
