@@ -2,28 +2,46 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define row 10
+#define column 10
+
 struct node {
-    int row, column ;
+    int row_coor, column_coor ;
     struct node *next;
 };
-struct node *head = NULL;
+struct node *head1 = NULL; // ship coordinates
+struct node *head2 = NULL; // forbidden coordinates
+
+/*
+void printList(struct node **head) {
+    struct node *ptr = *head;
+    printf("\n[ ");
+
+    while(ptr != NULL) {
+        printf("(%d,%d) ",ptr->row_coor,ptr->column_coor);
+        ptr = ptr->next;
+    }
+
+    printf(" ]");
+}
+ */
 
 void print_map();
 void get_coordinates();
 void insert_coordinates();
 
-int row, column;
 int main() {
-    scanf("%d %d", &row, &column);
     print_map(row, column);
     get_coordinates(5);
+   // printList(&head2);
+   // printList(&head1);
 }
 
-void print_map(int row, int column){
+void print_map(int inner_row, int inner_column){
     int i1, i2, i3, col_counter = 1;
     printf("   ");
 
-    for(i3 = 0; i3 < 4*column; i3++) {
+    for(i3 = 0; i3 < 4*inner_column; i3++) {
         if((i3 +2) % 4 == 0) {
             printf("%d", col_counter);
             col_counter++;
@@ -34,15 +52,15 @@ void print_map(int row, int column){
 
     printf("-\n");
 
-    for(i1 = 0; i1 < row; i1++){
+    for(i1 = 0; i1 < inner_row; i1++){
         printf("%3d", i1+1);
-        for(i2 = 0; i2 < column; i2++){
+        for(i2 = 0; i2 < inner_column; i2++){
             printf("|   ");
         }
 
         printf("|\n   ");
 
-        for(i3 = 0; i3 < 4*column; i3++) {
+        for(i3 = 0; i3 < 4*inner_column; i3++) {
             printf("-");
         }
         printf("-\n");
@@ -68,29 +86,46 @@ void get_coordinates(int lenght) {
         printf("your input was out of range ! :)\nTry Again...\n");
         get_coordinates(lenght);
     }
-    else if(first_row == end_row && (int)(abs(first_column - end_column)) == lenght ){
-        for(i = (int)fminf(first_column,end_column); i < (int)fmaxf(first_column,end_column); i++){
-            insert_coordinates(first_row, i);
+
+    else if(first_row == end_row && (int)(abs(first_column - end_column) + 1) == lenght ){
+
+        i = (int)fminf((float)first_column,(float)end_column);
+        insert_coordinates(first_row, i-1, &head2);
+
+        for(; i <= (int)fmaxf((float)first_column,(float)end_column); i++){
+            insert_coordinates(first_row, i, &head1);
+            insert_coordinates(first_row+1, i, &head2);
+            insert_coordinates(first_row-1, i, &head2);
         }
+        insert_coordinates(first_row, i, &head2);
     }
-    else if(first_column == end_column && (int)(abs(first_row - end_row)) == lenght ){
-        for(i = (int)fminf(first_row,end_row); i < (int)fmaxf(first_row,end_row); i++){
-            insert_coordinates(i, first_column);
+
+    else if(first_column == end_column && (int)(abs(first_row - end_row) + 1) == lenght ){
+
+        i = (int)fminf((float)first_row,(float)end_row);
+        insert_coordinates(i-1, first_column, &head2);
+
+        for(; i <= (int)fmaxf((float)first_row,(float)end_row); i++){
+            insert_coordinates(i, first_column, &head1);
+            insert_coordinates(i, first_column+1, &head2);
+            insert_coordinates(i, first_column-1, &head2);
         }
+        insert_coordinates(i, first_column, &head2);
     }
+
     else{
         printf("you entered invalid inputs! :)\nTry Again...\n");
         get_coordinates(lenght);
     }
-
 }
 
-void insert_coordinates( int row,int column){
+void insert_coordinates( int inner_row,int inner_column, struct node **head){
     struct node *link = (struct node*) malloc(sizeof(struct node));
 
-    link->row = row;
-    link->column = column;
+    link->row_coor = inner_row;
+    link->column_coor = inner_column;
 
-    link->next = head;
-    head = link;
+    link->next = *head;
+    *head = link;
 }
+
