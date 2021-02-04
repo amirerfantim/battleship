@@ -25,20 +25,43 @@ void printList(struct node **head) {
 
     printf(" ]");
 }
-*/
-
+ */
 void print_map();
 void get_coordinates();
 void insert_coordinates();
 void get_ship();
+int check_available_coor();
+struct node* find();
 
 int main() {
    print_map(row, column);
-  // get_ship();
+   get_ship();
   // printList(&head2);
-  //printList(&head1);
+  // printList(&head1);
 }
+/*
+int check_available_coor(int cte, int first, int end, int hor_or_vert){ // hor =1= horizontal & vert =2= vertical
+    int i;
 
+    if(hor_or_vert == 1) {
+        for (i = first; i <= end; i++) {
+            struct node *foundLink = find(cte, i , &head2);
+            if(foundLink != NULL) {
+                printf("%d %d %d %d\n", foundLink->row_coor, foundLink->column_coor, cte, i);
+                return  -1;
+            }
+        }
+    }
+    else if(hor_or_vert == 2) {
+        for (i = first; i <= end; i++) {
+            if (find(i, cte, &head2) != NULL){
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+*/
 void get_ship(){
     get_coordinates(5, 1);
     get_coordinates(3, 2);
@@ -50,6 +73,7 @@ void get_ship(){
     get_coordinates(1, 8);
     get_coordinates(1, 9);
     get_coordinates(1, 10);
+
 
 }
 
@@ -97,34 +121,51 @@ void get_coordinates(int lenght, int ship_num) {
     printf("enter column number of end point: ");
     scanf("%d", &end_column);
 
-    int i ;
-    if(fmax(first_row, end_row) <= row && fmax(first_column, end_column) <= column
-    && fmin(first_row, end_row)  > 0 && fmin(first_column, end_column) > 0) {
+    int i, min_row, max_row, min_column, max_column;
+    min_row = (int)fminf( (float)first_row, (float)end_row);
+    min_column = (int)fminf( (float)first_column, (float)end_column);
+    max_row = (int)fmaxf( (float)first_row, (float)end_row);
+    max_column = (int)fmaxf( (float)first_column, (float)end_column);
 
-        if (first_row == end_row && (int) (abs(first_column - end_column) + 1) == lenght) {
+    if(max_row <= row && max_column <= column && min_row > 0 && min_column > 0) {
+        if (first_row == end_row && ( max_column - min_column + 1) == lenght) {
+        //    if(check_available_coor(first_row, min_column, max_column, 1) == 0) {
+                i = min_column;
+                insert_coordinates(first_row, i - 1, ship_num, &head2);
 
-            i = (int) fminf((float) first_column, (float) end_column);
-            insert_coordinates(first_row, i - 1, ship_num, &head2);
-
-            for (; i <= (int) fmaxf((float) first_column, (float) end_column); i++) {
-                insert_coordinates(first_row, i, ship_num, &head1);
-                insert_coordinates(first_row + 1, i, ship_num, &head2);
-                insert_coordinates(first_row - 1, i, ship_num, &head2);
+                for (; i <= max_column; i++) {
+                    insert_coordinates(first_row, i, ship_num, &head1);
+                    insert_coordinates(first_row + 1, i, ship_num, &head2);
+                    insert_coordinates(first_row - 1, i, ship_num, &head2);
+                }
+                insert_coordinates(first_row, i, ship_num, &head2);
+        //    }
+        /*
+            else{
+                printf("\nYou cannot place a ship here...\nit has been taken :)\nTry Again\n\n");
+                get_coordinates(lenght, ship_num);
             }
-            insert_coordinates(first_row, i, ship_num, &head2);
+            */
         }
 
-        else if (first_column == end_column && (int) (abs(first_row - end_row) + 1) == lenght) {
+        else if (first_column == end_column && (max_row - min_row + 1) == lenght) {
 
-            i = (int) fminf((float) first_row, (float) end_row);
-            insert_coordinates(i - 1, first_column, ship_num, &head2);
+         //   if(check_available_coor(first_column, min_row, max_row, 2) == 0) {
+                i = min_row;
+                insert_coordinates(i - 1, first_column, ship_num, &head2);
 
-            for (; i <= (int) fmaxf((float) first_row, (float) end_row); i++) {
-                insert_coordinates(i, first_column, ship_num, &head1);
-                insert_coordinates(i, first_column + 1, ship_num, &head2);
-                insert_coordinates(i, first_column - 1, ship_num, &head2);
+                for (; i <= max_row; i++) {
+                    insert_coordinates(i, first_column, ship_num, &head1);
+                    insert_coordinates(i, first_column + 1, ship_num, &head2);
+                    insert_coordinates(i, first_column - 1, ship_num, &head2);
+                }
+                insert_coordinates(i, first_column, ship_num, &head2);
+         /*   } else{
+                printf("\nYou cannot place a ship here...\nit has been taken or next to another ship :)"
+                       "\nTry Again\n\n");
+                get_coordinates(lenght, ship_num);
             }
-            insert_coordinates(i, first_column, ship_num, &head2);
+            */
         }
         else{
             printf("\nyou entered invalid inputs! :)\nTry Again...\n\n");
@@ -133,7 +174,7 @@ void get_coordinates(int lenght, int ship_num) {
     }
 
     else{
-        printf("\nyou entered invalid inputs! :)\nTry Again...\n\n");
+        printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
         get_coordinates(lenght,ship_num);
     }
 }
@@ -148,4 +189,25 @@ void insert_coordinates( int inner_row,int inner_column,int ship_num, struct nod
     link->next = *head;
     *head = link;
 }
+
+/*
+struct node* find(int inner_row,  int inner_column, struct node **head) {
+
+    struct node* current = *head;
+
+    if(*head == NULL) {
+        return NULL;
+    }
+
+    while(current->row_coor != inner_row) {
+            if (current->next == NULL) {
+                return NULL;
+            } else {
+                current = current->next;
+            }
+
+        return current;
+    }
+}
+ */
 
