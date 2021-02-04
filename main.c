@@ -75,8 +75,8 @@ void get_ship(){
     get_coordinates(3, 3);
     system("cls");
     print_map(10,10,11);
+        /*
     get_coordinates(2, 4);
-    /*
     get_coordinates(2, 5);
     get_coordinates(2, 6);
     get_coordinates(1, 7);
@@ -143,6 +143,7 @@ void print_map(int inner_row, int inner_column, int length){
     for(i1 = 0; i1 <= row * column; i1++){
         show_ship[i1] = ' ';
     }
+
     int i4 =0;
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
@@ -150,22 +151,18 @@ void print_map(int inner_row, int inner_column, int length){
                 show_ship[i4] = 'S';
                 j--;
                 i1 = 0;
+                i2 = 0;
                 i4=0;
-                break;
             }
             i4++;
         }
     }
-    for(i1 = 0; i1 < row*column; i1++) {
-        printf("%c",show_ship[i1]);
-    }
-    printf("\n");
 
     i4 = 0;
     for(i1 = 0; i1 < inner_row; i1++){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < inner_column; i2++){
-            printf("| %c%d", show_ship[i4],  i4);
+            printf("| %c ", show_ship[i4]);
             i4++;
         }
 
