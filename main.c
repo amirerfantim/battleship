@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <conio.h>
+#include <stdbool.h>
 
 #define row 10
 #define column 10
@@ -138,20 +139,34 @@ void print_map(int inner_row, int inner_column, int length){
     }
 
     printf("\n");
+    char show_ship[row * column+1] ;
+    for(i1 = 0; i1 <= row * column; i1++){
+        show_ship[i1] = ' ';
+    }
+    int i4 =0;
+    for (i1 = 0; i1 < row; i1++) {
+        for (i2 = 0; i2 < column; i2++) {
+            if (splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
+                show_ship[i4] = 'S';
+                j--;
+                i1 = 0;
+                i4=0;
+                break;
+            }
+            i4++;
+        }
+    }
+    for(i1 = 0; i1 < row*column; i1++) {
+        printf("%c",show_ship[i1]);
+    }
+    printf("\n");
 
-    char show_ship ;
-
+    i4 = 0;
     for(i1 = 0; i1 < inner_row; i1++){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < inner_column; i2++){
-            if(splitted_row[j] == i1+1 && splitted_col[j] == i2+1) {
-                show_ship = 'S';
-                printf("| %c ", show_ship);
-                j--;
-            }
-            else{
-                printf("|   ");
-            }
+            printf("| %c%d", show_ship[i4],  i4);
+            i4++;
         }
 
         printf("|\n   ");
@@ -161,6 +176,7 @@ void print_map(int inner_row, int inner_column, int length){
         }
         printf("-\n");
     }
+
 
 }
 
