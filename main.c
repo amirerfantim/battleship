@@ -29,8 +29,7 @@ void printList(struct node **head) {
     printf(" ]");
 }
 
-void print_map_p1();
-void print_map_p2();
+void print_map();
 void get_coordinates_p1();
 void get_coordinates_p2();
 void insert_coordinates();
@@ -46,6 +45,7 @@ int main() {
     // printList(&head2_p1);
     // printList(&head1_p1);
 }
+
 
 
 int check_available_coor_p1(int cte, int first, int end, int hor_or_vert){ // hor =1= horizontal & vert =2= vertical
@@ -73,15 +73,15 @@ int check_available_coor_p1(int cte, int first, int end, int hor_or_vert){ // ho
 void get_ship(){
     get_coordinates_p1(5, 1);
     system("cls");
-    print_map_p1(5);
+    print_map(5, &head1_p1);
 
     get_coordinates_p1(3, 2);
     system("cls");
-    print_map_p1(8);
+    print_map(8, &head1_p1);
 
     get_coordinates_p1(3, 3);
     system("cls");
-    print_map_p1(11);
+    print_map(11, &head1_p1);
 
     int i;
     for(i = 5; i>0; i--) {
@@ -90,7 +90,7 @@ void get_ship(){
     }
     system("cls");
 
-
+/*
     get_coordinates_p1(2, 4);
     get_coordinates_p1(2, 5);
     get_coordinates_p1(2, 6);
@@ -98,19 +98,19 @@ void get_ship(){
     get_coordinates_p1(1, 8);
     get_coordinates_p1(1, 9);
     get_coordinates_p1(1, 10);
-
+*/
 
     get_coordinates_p2(5, 1);
     system("cls");
-    print_map_p2(5);
+    print_map(5, &head1_p2);
 
     get_coordinates_p2(3, 2);
     system("cls");
-    print_map_p2(8);
+    print_map(8, &head1_p2);
 
     get_coordinates_p2(3, 3);
     system("cls");
-    print_map_p2(11);
+    print_map(11, &head1_p2);
 
     for(i = 5; i>0; i--) {
         printf("This map will be hidden after %d second(s)...\n", i);
@@ -151,13 +151,13 @@ int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row 
     return result;
 }
 
-void print_map_p1(int length){
+void print_map(int length, struct node **head1){
 
     int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length], box[row][column];
 
     for(i1 = 0; i1 < length; i1++){
-       splitted_row[i1] = coor_spliter(i1, 1, &head1_p1);
-       splitted_col[i1] = coor_spliter(i1, 2, &head1_p1);
+       splitted_row[i1] = coor_spliter(i1, 1, head1);
+       splitted_col[i1] = coor_spliter(i1, 2, head1);
     }
 
 
@@ -194,69 +194,6 @@ void print_map_p1(int length){
                 i4=0;
             }
                 i4++;
-        }
-    }
-
-    i4 = 0;
-    for(i1 = 0; i1 < row; i1++){
-        printf("%3d", i1+1);
-        for(i2 = 0; i2 < column; i2++){
-            printf("| %c ", show_ship[i4]);
-            i4++;
-        }
-
-        printf("|\n   ");
-
-        for(i3 = 0; i3 < 4*column; i3++) {
-            printf("-");
-        }
-        printf("-\n");
-    }
-}
-
-void print_map_p2(int length){
-
-    int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length], box[row][column];
-
-    for(i1 = 0; i1 < length; i1++){
-        splitted_row[i1] = coor_spliter(i1, 1, &head1_p2);
-        splitted_col[i1] = coor_spliter(i1, 2, &head1_p2);
-    }
-
-
-    printf("   ");
-
-    for(i3 = 0; i3 < 4*column; i3++) {
-        if((i3 +2) % 4 == 0) {
-            printf("%d", col_counter);
-            col_counter++;
-        }else{
-            printf("-");
-        }
-    }
-
-    printf("\n");
-    char show_ship[row * column+1] ;
-    for(i1 = 0; i1 <= row * column; i1++){
-        show_ship[i1] = ' ';
-    }
-
-    int i4 =0;
-    j =0;
-    for (i1 = 0; i1 < row; i1++) {
-        for (i2 = 0; i2 < column; i2++) {
-            if(splitted_row[j] == 1 && splitted_col[j] == 1){
-                show_ship[0] = 'S';
-                j++;
-            }
-            else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
-                show_ship[i4] = 'S';
-                j++;
-                i1 = 0;
-                i2 = 0;
-                i4=0;
-            }
-            i4++;
         }
     }
 
