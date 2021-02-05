@@ -18,7 +18,7 @@ struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
 
-/*
+
 void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
@@ -28,7 +28,6 @@ void printList(struct node **head) {
     }
     printf(" ]");
 }
- */
 
 void print_map_p1();
 void print_map_p2();
@@ -152,11 +151,11 @@ int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row 
 
 void print_map_p1(int length){
 
-    int i1, i2, i3, col_counter = 1, j = length-1, splitted_row[length], splitted_col[length];
+    int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length], box[row][column];
 
     for(i1 = 0; i1 < length; i1++){
-        splitted_row[i1] = coor_spliter(i1, 1, &head1_p1);
-        splitted_col[i1] = coor_spliter(i1, 2, &head1_p1);
+       splitted_row[i1] = coor_spliter(i1, 1, &head1_p1);
+       splitted_col[i1] = coor_spliter(i1, 2, &head1_p1);
     }
 
 
@@ -178,16 +177,21 @@ void print_map_p1(int length){
     }
 
     int i4 =0;
+    j =0;
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
-            if (splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
+            if(splitted_row[j] == 1 && splitted_col[j] == 1){
+                show_ship[0] = 'S';
+                j++;
+            }
+            else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
                 show_ship[i4] = 'S';
-                j--;
+                j++;
                 i1 = 0;
                 i2 = 0;
                 i4=0;
             }
-            i4++;
+                i4++;
         }
     }
 
@@ -210,7 +214,7 @@ void print_map_p1(int length){
 
 void print_map_p2(int length){
 
-    int i1, i2, i3, col_counter = 1, j = length-1, splitted_row[length], splitted_col[length];
+    int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length], box[row][column];
 
     for(i1 = 0; i1 < length; i1++){
         splitted_row[i1] = coor_spliter(i1, 1, &head1_p2);
@@ -236,11 +240,16 @@ void print_map_p2(int length){
     }
 
     int i4 =0;
+    j =0;
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
-            if (splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
+            if(splitted_row[j] == 1 && splitted_col[j] == 1){
+                show_ship[0] = 'S';
+                j++;
+            }
+            else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
                 show_ship[i4] = 'S';
-                j--;
+                j++;
                 i1 = 0;
                 i2 = 0;
                 i4=0;
