@@ -90,15 +90,15 @@ void get_ship(){
     }
     system("cls");
 
-    /*
-get_coordinates_p1(2, 4);
-get_coordinates_p1(2, 5);
-get_coordinates_p1(2, 6);
-get_coordinates_p1(1, 7);
-get_coordinates_p1(1, 8);
-get_coordinates_p1(1, 9);
-get_coordinates_p1(1, 10);
- */
+
+    get_coordinates_p1(2, 4);
+    get_coordinates_p1(2, 5);
+    get_coordinates_p1(2, 6);
+    get_coordinates_p1(1, 7);
+    get_coordinates_p1(1, 8);
+    get_coordinates_p1(1, 9);
+    get_coordinates_p1(1, 10);
+
 
     get_coordinates_p2(5, 1);
     system("cls");
