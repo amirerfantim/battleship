@@ -15,6 +15,7 @@ struct node {
     int row_coor, column_coor, ship_num ;
     struct node *next;
 };
+
 struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head1_p2 = NULL; // ship coordinates
@@ -44,6 +45,7 @@ void get_ship();
 int coor_spliter();
 int check_available_coor();
 void WriteListToFile();
+int length();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 
@@ -52,11 +54,9 @@ bool search_linked();
 
 int main() {
     system("cls");
-    //main_menu();
-    get_ship(&head1_p1, &head2_p1);
-    get_ship(&head1_p2, &head2_p2);
-    // printList(&head2_p1);
-    // printList(&head1_p1);
+    main_menu();
+    //get_ship(&head1_p1, &head2_p1);
+    //get_ship(&head1_p2, &head2_p2);
 }
 
 void main_menu(){
@@ -75,6 +75,10 @@ void main_menu(){
                 create_newuser();
             }
         }
+    }
+    if(command1 == 2){
+        ReadListIn(&head1_p1);
+        print_map(length(&head1_p1), &head1_p1);
     }
 }
 
@@ -151,6 +155,7 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(11, head1);
+    WriteListToFile(head1_p1);
 
     countdown(5);
     system("cls");
@@ -345,8 +350,7 @@ void insert_coordinates( int inner_row,int inner_column,int ship_num, struct nod
     *head = link;
 }
 
-bool search_linked(struct node** head1, int inner_row, int inner_col)
-{
+bool search_linked(struct node** head1, int inner_row, int inner_col){
     struct node* current = *head1;
     while (current != NULL)
     {
@@ -365,7 +369,6 @@ void WriteListToFile(struct node* start) {
         struct node *currentCar = start;
 
         struct node *holdNext = NULL;
-        struct node *holdPrevious = NULL;
 
         while(currentCar != NULL) {
             holdNext = currentCar->next;
@@ -378,7 +381,6 @@ void WriteListToFile(struct node* start) {
             currentCar->next = holdNext;
 
             holdNext = NULL;
-            holdPrevious = NULL;
 
             currentCar = currentCar->next;
         }
@@ -438,6 +440,17 @@ struct node *ReadListIn(struct node **start) {
 
     return *start;
 
+}
+
+int length(struct  node **head) {
+    int length = 0;
+    struct node *current;
+
+    for(current = *head; current != NULL; current = current->next) {
+        length++;
+    }
+
+    return length;
 }
 
 /*
