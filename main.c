@@ -52,10 +52,11 @@ bool search_linked();
 
 int main() {
     system("cls");
-    get_ship();
+    //main_menu();
+    get_ship(&head1_p1, &head2_p1);
+    get_ship(&head1_p2, &head2_p2);
     // printList(&head2_p1);
     // printList(&head1_p1);
-    main_menu();
 }
 
 void main_menu(){
@@ -67,7 +68,7 @@ void main_menu(){
         printf("First Player:\n");
         show_player_menu();
         command2 = get_command();
-        if(command2 == 2){
+        if(command2 == 1){
             show_choose_user();
             command3 = get_command();
             if(command3 == 2){
@@ -85,7 +86,7 @@ int get_command(){
 }
 
 void create_newuser(){
-    printf("enter a username [maximum of 20 character]: ");
+    printf("enter a username [maximum of 20 characters]: ");
     scanf("%s", username);
     printf("Congratulations %s!\n", username);
 }
@@ -100,7 +101,7 @@ void show_main_menu(){
 }
 
 void show_player_menu(){
-    printf("1. Choose User:\n"
+    printf("1. Choose User\n"
            "2. Put Ships\n");
 }
 
@@ -138,18 +139,18 @@ void countdown(int duration){
     }
 }
 
-void get_ship(){
-    get_coordinates(5, 1, &head1_p1, &head2_p1);
+void get_ship(struct node **head1, struct node **head2){
+    get_coordinates(5, 1, head1, head2);
     system("cls");
-    print_map(5, &head1_p1);
+    print_map(5, head1);
 
-    get_coordinates(3, 2, &head1_p1, &head2_p1);
+    get_coordinates(3, 2, head1, head2);
     system("cls");
-    print_map(8, &head1_p1);
+    print_map(8, head1);
 
-    get_coordinates(3, 3, &head1_p1, &head2_p1);
+    get_coordinates(3, 3, head1, head2);
     system("cls");
-    print_map(11, &head1_p1);
+    print_map(11, head1);
 
     countdown(5);
     system("cls");
@@ -163,22 +164,6 @@ void get_ship(){
     get_coordinates_p1(1, 9);
     get_coordinates_p1(1, 10);
 */
-
-    get_coordinates(5, 1, &head1_p2, &head2_p2);
-    system("cls");
-    print_map(5, &head1_p2);
-
-    get_coordinates(3, 2, &head1_p2, &head2_p2);
-    system("cls");
-    print_map(8, &head1_p2);
-
-    get_coordinates(3, 3, &head1_p2, &head2_p2);
-    system("cls");
-    print_map(11, &head1_p2);
-
-    countdown(5);
-    system("cls");
-
 }
 
 int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row num & col =2= return column num
