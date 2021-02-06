@@ -8,6 +8,8 @@
 #define row 10
 #define column 10
 
+char username[20];
+
 struct node {
 
     int row_coor, column_coor, ship_num ;
@@ -17,7 +19,6 @@ struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
-
 
 void printList(struct node **head) {
     struct node *ptr = *head;
@@ -29,6 +30,12 @@ void printList(struct node **head) {
     printf(" ]");
 }
 
+void main_menu();
+void show_main_menu();
+void show_player_menu();
+void show_choose_user();
+void create_newuser();
+int get_command();
 void print_map();
 void countdown();
 void get_coordinates();
@@ -48,6 +55,58 @@ int main() {
     get_ship();
     // printList(&head2_p1);
     // printList(&head1_p1);
+    main_menu();
+}
+
+void main_menu(){
+    int command1, command2, command3;
+    show_main_menu();
+    command1 = get_command();
+
+    if(command1 == 1){
+        printf("First Player:\n");
+        show_player_menu();
+        command2 = get_command();
+        if(command2 == 2){
+            show_choose_user();
+            command3 = get_command();
+            if(command3 == 2){
+                create_newuser();
+            }
+        }
+    }
+}
+
+int get_command(){
+    int command;
+    printf("enter your command: ");
+    scanf("%d", &command);
+    return  command;
+}
+
+void create_newuser(){
+    printf("enter a username [maximum of 20 character]: ");
+    scanf("%s", username);
+    printf("Congratulations %s!\n", username);
+}
+
+void show_main_menu(){
+    printf("\n"
+           "1. Play with a Friend\n"
+           "2. Play with bot\n"
+           "3. Load a Game\n"
+           "4. Score Board\n"
+           "5. Exit\n");
+}
+
+void show_player_menu(){
+    printf("1. Choose User:\n"
+           "2. Put Ships\n");
+}
+
+void show_choose_user(){
+    printf("1. Choose from available users\n"
+           "2. New user\n");
 }
 
 int check_available_coor(int cte, int first, int end, int hor_or_vert, struct node **head2){ // hor =1= horizontal & vert =2= vertical
