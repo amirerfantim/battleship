@@ -36,6 +36,10 @@ void insert_coordinates();
 void get_ship();
 int coor_spliter();
 int check_available_coor();
+void WriteListToFile();
+struct node *ReadNextFromFile();
+struct node *ReadListIn();
+
 bool search_linked();
 //struct node* find();
 
@@ -233,7 +237,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
 
     if(max_row <= row && max_column <= column && min_row > 0 && min_column > 0) {
         if (first_row == end_row && ( max_column - min_column + 1) == length) {
-            if(check_available_coor(first_row, min_column, max_column, 1, head2) == 0) {
+            if(check_available_coor(first_row, min_column, max_column, 1, head2) == 0 &&
+               check_available_coor(first_column, min_row, max_row, 2, head1) == 0 ) {
                 i = min_column;
                 insert_coordinates(first_row, i - 1, ship_num, head2);
 
@@ -253,7 +258,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
 
         else if (first_column == end_column && (max_row - min_row + 1) == length) {
 
-            if(check_available_coor(first_column, min_row, max_row, 2, head2) == 0) {
+            if(check_available_coor(first_column, min_row, max_row, 2, head2) == 0 &&
+            check_available_coor(first_column, min_row, max_row, 2, head1) == 0  ) {
                 i = min_row;
                 insert_coordinates(i - 1, first_column, ship_num, head2);
 
@@ -305,6 +311,89 @@ bool search_linked(struct node** head1, int inner_row, int inner_col)
         current = current->next;
     }
     return false;
+}
+
+void WriteListToFile(struct node* start) {
+    FILE *pFile;
+    pFile = fopen("myList.bin", "wb");
+
+    if(pFile != NULL) {
+        struct node *currentCar = start;
+
+        struct node *holdNext = NULL;
+        struct node *holdPrevious = NULL;
+
+        while(currentCar != NULL) {
+            holdNext = currentCar->next;
+
+            currentCar->next = NULL;
+
+            fseek(pFile, 0, SEEK_END);
+            fwrite(currentCar, sizeof(struct node), 1, pFile);
+
+            currentCar->next = holdNext;
+
+            holdNext = NULL;
+            holdPrevious = NULL;
+
+            currentCar = currentCar->next;
+        }
+        fclose(pFile);
+        pFile = NULL;
+        printf("* saved *");
+
+    } else {
+        printf("FILE OPEN ERROR\n");
+    }
+
+}
+
+struct node *ReadNextFromFile(struct node *start, FILE *pFile) {
+    size_t returnValue;
+    if(start == NULL) {
+        start = malloc(sizeof(struct node));
+        returnValue = fread(start, sizeof(struct node), 1, pFile);\
+        start->next = NULL;
+    } else {
+        struct node *indexCar = start;
+        struct node *newCar = malloc(sizeof(struct node));
+        while(indexCar->next != NULL) {
+            indexCar = indexCar->next;
+        }
+        returnValue = fread(newCar, sizeof(struct node), 1, pFile);
+        indexCar->next = newCar;
+        newCar->next = NULL;
+    }
+    return start;
+}
+
+struct node *ReadListIn(struct node **start) {
+
+    FILE *pFile;
+    pFile = fopen("myList.bin", "rb");
+    if(pFile != NULL) {
+
+        //CleanUp(*start);
+        *start = NULL;
+
+        fseek(pFile, 0, SEEK_END);
+        long fileSize = ftell(pFile);
+        rewind(pFile);
+
+        int numEntries = (int)(fileSize / (sizeof(struct node)));
+        printf("numEntries:%d\n",numEntries);
+
+        int loop ;
+        for(loop = 0; loop < numEntries; ++loop) {
+            fseek(pFile, (sizeof(struct node) * loop), SEEK_SET);
+            *start = ReadNextFromFile(*start, pFile);
+        }
+    }  else {
+        printf("FILE OPEN ERROR FOR READ\n");
+    }
+
+    return *start;
+
 }
 
 /*
