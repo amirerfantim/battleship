@@ -8,18 +8,21 @@
 #define row 10
 #define column 10
 
-char username[20];
+char username[20] = "amirerfan";
 
 struct node {
 
-    int row_coor, column_coor, ship_num ;
+    int row_coor, column_coor, ship_num ; // ship_num equal to hit number in atk list's.
     struct node *next;
 };
 
 struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
+struct node *head_atkp1 = NULL; // coor that player1 attacked
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
+struct node *head2_atkp2 = NULL; // coor that player2 attacked
+
 
 void printList(struct node **head) {
     struct node *ptr = *head;
@@ -38,8 +41,10 @@ void show_choose_user();
 void create_newuser();
 int get_command();
 void print_map();
+void print_atk_map();
 void countdown();
 void get_coordinates();
+void attack_coordinates();
 void insert_coordinates();
 void get_ship();
 int coor_spliter();
@@ -54,9 +59,10 @@ bool search_linked();
 
 int main() {
     system("cls");
-    main_menu();
-    //get_ship(&head1_p1, &head2_p1);
+    //main_menu();
+    get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
+
 }
 
 void main_menu(){
@@ -76,10 +82,7 @@ void main_menu(){
             }
         }
     }
-    if(command1 == 2){
-        ReadListIn(&head1_p1);
-        print_map(length(&head1_p1), &head1_p1);
-    }
+
 }
 
 int get_command(){
@@ -155,7 +158,7 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(11, head1);
-    WriteListToFile(head1_p1);
+    //WriteListToFile(head1_p1, 1, 1);
 
     countdown(5);
     system("cls");
@@ -204,7 +207,7 @@ int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row 
 
 void print_map(int length, struct node **head1){
 
-    int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length], box[row][column];
+    int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length];
 
     for(i1 = 0; i1 < length; i1++){
        splitted_row[i1] = coor_spliter(i1, 1, head1);
@@ -253,6 +256,90 @@ void print_map(int length, struct node **head1){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < column; i2++){
             printf("| %c ", show_ship[i4]);
+            i4++;
+        }
+
+        printf("|\n   ");
+
+        for(i3 = 0; i3 < 4*column; i3++) {
+            printf("-");
+        }
+        printf("-\n");
+    }
+}
+
+void print_atk_map(struct node **head1, struct node **ships){
+
+    int i1, i2, i3, col_counter = 1,inner_length = length(head1), j ;
+    int splitted_row[inner_length], splitted_col[inner_length];
+
+
+    for(i1 = 0; i1 < inner_length; i1++){
+        splitted_row[i1] = coor_spliter(i1, 1, head1);
+        splitted_col[i1] = coor_spliter(i1, 2, head1);
+        printf("%d %d\n",splitted_row[i1], splitted_col[i1] );
+    }
+
+    printf("   ");
+
+    for(i3 = 0; i3 < 4*column; i3++) {
+        if((i3 +2) % 4 == 0) {
+            printf("%d", col_counter);
+            col_counter++;
+        }else{
+            printf("-");
+        }
+    }
+
+    printf("\n");
+    char hit_spots[row * column+1] ;
+    for(i1 = 0; i1 <= row * column; i1++){
+        hit_spots[i1] = ' ';
+    }
+
+    int i4 =0;
+    j =0;
+    bool hit_or_not;
+    for (i1 = 0; i1 < row; i1++) {
+        for (i2 = 0; i2 < column; i2++) {
+            if(splitted_row[j] == 1 && splitted_col[j] == 1){
+                hit_or_not = search_linked(ships, 1, 1);
+                if( hit_or_not == true){
+                    hit_spots[0] = 'E';
+                }
+                if(hit_or_not == false){
+                    hit_spots[0] = 'W';
+                }
+
+                j++;
+            }
+            else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
+                hit_or_not =search_linked(ships, i1+1, i2+1);
+                if(hit_or_not == true){
+                    hit_spots[i4] = 'E';
+                }
+                if(hit_or_not == false){
+                    hit_spots[i4] = 'W';
+                }
+                j++;
+                i1 = 0;
+                i2 = 0;
+                i4=0;
+            }
+            i4++;
+        }
+    }
+
+    for(int loop = 0; loop < 100; loop++){
+        printf("%c", hit_spots[loop]);
+    }
+    printf("\n");
+
+    i4 = 0;
+    for(i1 = 0; i1 < row; i1++){
+        printf("%3d", i1+1);
+        for(i2 = 0; i2 < column; i2++){
+            printf("| %c ", hit_spots[i4]);
             i4++;
         }
 
@@ -339,6 +426,35 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
     }
 }
 
+void attack_coordinates(struct node **head) {
+    printf("\nenter coordinate you wanna hit:\n");
+    int inner_row, inner_column;
+    static int counter = 1;
+
+    printf("enter row number of start point: ");
+    scanf("%d", &inner_row);
+    printf("enter column number of start point: ");
+    scanf("%d", &inner_column);
+
+
+    if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
+            if(search_linked(head, inner_row, inner_column) == false) {
+                insert_coordinates(inner_row, inner_column, counter, head);
+            }
+            else{
+                printf("\nYou've already hit this coordinate...\nTry Again\n\n");
+                    attack_coordinates(head);
+                }
+        }
+
+
+    else{
+        printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
+        attack_coordinates(head);
+    }
+    counter++;
+}
+
 void insert_coordinates( int inner_row,int inner_column,int ship_num, struct node **head){
     struct node *link = (struct node*) malloc(sizeof(struct node));
 
@@ -361,9 +477,17 @@ bool search_linked(struct node** head1, int inner_row, int inner_col){
     return false;
 }
 
-void WriteListToFile(struct node* start) {
+void WriteListToFile(struct node* start, int head_num, int player_num) {
     FILE *pFile;
-    pFile = fopen("myList.bin", "wb");
+    char filename[27];
+    strcpy(filename, username);
+    /*
+    int username_len = strlen(username);
+    filename[username_len] = (char)(head_num);
+    filename[username_len+1] = (char)(player_num);
+     */
+    strcat(filename, ".bin");
+    pFile = fopen(filename, "wb");
 
     if(pFile != NULL) {
         struct node *currentCar = start;
@@ -416,7 +540,10 @@ struct node *ReadNextFromFile(struct node *start, FILE *pFile) {
 struct node *ReadListIn(struct node **start) {
 
     FILE *pFile;
-    pFile = fopen("myList.bin", "rb");
+    char filename[27];
+    strcpy(filename, username);
+    strcat(filename, ".bin");
+    pFile = fopen(filename, "rb");
     if(pFile != NULL) {
 
         //CleanUp(*start);
