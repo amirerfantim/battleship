@@ -19,6 +19,8 @@ struct node {
 struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head_atkp1 = NULL; // coor that player1 attacked
+struct node *head_desp1 = NULL; // coor that player1 attacked
+
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
 struct node *head2_atkp2 = NULL; // coor that player2 attacked
@@ -47,22 +49,27 @@ void get_coordinates();
 void attack_coordinates();
 void insert_coordinates();
 void get_ship();
+int destroyed_ship();
 int coor_spliter();
 int check_available_coor();
 void WriteListToFile();
 int length();
+int counter_linked();
+int counter_shipnum();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
-
+struct node *find();
 bool search_linked();
-//struct node* find();
+
 
 int main() {
     system("cls");
     //main_menu();
     get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
-
+    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
 }
 
 void main_menu(){
@@ -430,33 +437,45 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
     }
 }
 
-void attack_coordinates(struct node **head) {
+// if head==p1 then ships==p2
+void attack_coordinates(struct node **attack, struct node **ships2, struct node **destroy) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column;
-    static int counter = 1;
 
     printf("enter row number of start point: ");
     scanf("%d", &inner_row);
     printf("enter column number of start point: ");
     scanf("%d", &inner_column);
 
+    int hit_or_not = counter_linked(ships2, inner_row, inner_column);
+    int ship_num = 0, ship_length = 0;
+    struct node* search_result = find(inner_row, inner_column, ships2);
+
+    if(search_result != NULL){
+        ship_num = search_result->ship_num;
+        ship_length = search_result->ship_length;
+    }
+
+    int check_destroyed;
+    if(hit_or_not != 0){
+        check_destroyed = destroyed_ship(ship_num, ship_length, destroy, attack);
+    }
 
     if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
-        if(search_linked(head, inner_row, inner_column) == false) {
-            insert_coordinates(inner_row, inner_column, counter, 0, head);
+        if(search_linked(attack, inner_row, inner_column) == false) {
+            insert_coordinates(inner_row, inner_column, ship_num, ship_length, attack);
         }
         else{
             printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-            attack_coordinates(head);
+            attack_coordinates(attack, ships2, destroy);
         }
     }
 
 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
-        attack_coordinates(head);
+        attack_coordinates(attack, ships2, destroy);
     }
-    counter++;
 }
 
 void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_length, struct node **head){
@@ -471,6 +490,15 @@ void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_le
     *head = link;
 }
 
+int destroyed_ship(int ship_num,int ship_length,  struct node** attack){
+    int counter = 0;
+    counter = counter_shipnum(attack, ship_num);
+    if(counter == ship_length){
+        return 1;
+    }
+    return 0;
+}
+
 bool search_linked(struct node** head1, int inner_row, int inner_col){
     struct node* current = *head1;
     while (current != NULL)
@@ -480,6 +508,32 @@ bool search_linked(struct node** head1, int inner_row, int inner_col){
         current = current->next;
     }
     return false;
+}
+
+int counter_linked(struct node** head1, int inner_row, int inner_col){
+    int counter = 0;
+    struct node* current = *head1;
+    while (current != NULL)
+    {
+        if ((current->row_coor == inner_row) && (current->column_coor == inner_col)) {
+            counter++;
+        }
+        current = current->next;
+    }
+    return counter;
+}
+
+int counter_shipnum(struct node** head1, int key){
+    int counter = 0;
+    struct node* current = *head1;
+    while (current != NULL)
+    {
+        if (current->ship_num == key) {
+            counter++;
+        }
+        current = current->next;
+    }
+    return counter;
 }
 
 void WriteListToFile(struct node* start, int head_num, int player_num) {
@@ -585,19 +639,24 @@ int length(struct  node **head) {
     return length;
 }
 
-/*
-struct node* find(int inner_row,  int inner_column, struct node **head) {
-    struct node* current = *head;
-    if(*head == NULL) {
+struct node* find(int inner_row,int inner_col, struct node** head1) {
+
+    struct node* current = *head1;
+
+    if(*head1 == NULL) {
         return NULL;
     }
-    while(current->row_coor != inner_row) {
-            if (current->next == NULL) {
-                return NULL;
-            } else {
-                current = current->next;
-            }
-        return current;
+
+    while(current != NULL) {
+        if(current->row_coor == inner_row && current->column_coor == inner_col){
+            break;
+        }
+        if(current->next == NULL) {
+            return NULL;
+        } else {
+            current = current->next;
+        }
     }
+
+    return current;
 }
- */
