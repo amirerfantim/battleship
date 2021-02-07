@@ -70,14 +70,11 @@ int main() {
     //main_menu();
     get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
-    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
-    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
-    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
-    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
-    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
-    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
-    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
-    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
+    while(head1_p1 != NULL) {
+        attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+        print_atk_map(&head_atkp1, &head1_p1, &head_desp1);
+    }
+
 
     printList(&head_desp1);
     printList(&head_atkp1);
@@ -237,6 +234,7 @@ void print_map(int length, struct node **head1){
         splitted_col[i1] = coor_spliter(i1, 2, head1);
     }
 
+    fflush(stdin);
 
     printf("   ");
 
@@ -272,7 +270,7 @@ void print_map(int length, struct node **head1){
                 i2 = 0;
                 //i4=0;
             }
-           // i4++;
+            // i4++;
         }
     }
 
@@ -314,9 +312,6 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
         //printf("%d %d\n",des_row[i1], des_col[i1] );
     }
 
-
-
-
     printf("   ");
 
     for(i3 = 0; i3 < 4*column; i3++) {
@@ -339,7 +334,6 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
     int i4 =0, j2 = 0;
     j1 =0;
     bool hit_or_not;
-
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
             if (splitted_row[j1] == 1 && splitted_col[j1] == 1) {
@@ -363,23 +357,23 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
                 j1++;
                 i1 = 0;
                 i2 = 0;
-               // i4 = 0;
+                // i4 = 0;
             }
         }
-       // i4++;
+        // i4++;
     }
     if(des_length > 0) {
         for (i1 = 0; i1 < row; i1++) {
             for (i2 = 0; i2 < column; i2++) {
-                if (des_row[j2] == 1 && des_col[j2] == 1) {
-                    hit_spots[0][0] = 'C';
-                    j2++;
-                } else if (des_row[j2] == i1 + 1 && des_col[j2] == i2 + 1) {
-                    hit_spots[i1][i2] = 'C';
-                    j2++;
-                    i1 = 0;
-                    i2 = 0;
-                }
+                    if (des_row[j2] == 1 && des_col[j2] == 1) {
+                        hit_spots[0][0] = 'C';
+                        j2++;
+                    } else if (des_row[j2] == i1 + 1 && des_col[j2] == i2 + 1) {
+                        hit_spots[i1][i2] = 'C';
+                        j2++;
+                        i1 = 0;
+                        i2 = 0;
+                    }
             }
         }
     }
@@ -493,6 +487,7 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
     scanf("%d", &inner_row);
     printf("enter column number of start point: ");
     scanf("%d", &inner_column);
+    fflush(stdin);
 
     int hit_or_not = counter_linked(ships2, inner_row, inner_column);
     int ship_num = 0, ship_length = 0;
