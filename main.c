@@ -12,7 +12,7 @@ char username[20] = "amirerfan";
 
 struct node {
 
-    int row_coor, column_coor, ship_num ; // ship_num equal to hit number in atk list's.
+    int row_coor, column_coor,ship_length, ship_num ; // ship_num equal to hit number in atk list's.
     struct node *next;
 };
 
@@ -28,7 +28,7 @@ void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
     while (ptr != NULL) {
-        printf("(%d,%d,[%d])\n ", ptr->row_coor, ptr->column_coor, ptr->ship_num);
+        printf("(%d,%d,[%d] {%d})\n ", ptr->row_coor, ptr->column_coor, ptr->ship_num, ptr->ship_length);
         ptr = ptr->next;
     }
     printf(" ]");
@@ -159,7 +159,11 @@ void get_ship(struct node **head1, struct node **head2){
     system("cls");
     print_map(11, head1);
     //WriteListToFile(head1_p1, 1, 1);
-
+/*
+    get_coordinates(2, 4, head1, head2);
+    system("cls");
+    print_map(13, head1);
+    */
     countdown(5);
     system("cls");
 
@@ -210,8 +214,8 @@ void print_map(int length, struct node **head1){
     int i1, i2, i3, col_counter = 1, j , splitted_row[length], splitted_col[length];
 
     for(i1 = 0; i1 < length; i1++){
-       splitted_row[i1] = coor_spliter(i1, 1, head1);
-       splitted_col[i1] = coor_spliter(i1, 2, head1);
+        splitted_row[i1] = coor_spliter(i1, 1, head1);
+        splitted_col[i1] = coor_spliter(i1, 2, head1);
     }
 
 
@@ -247,7 +251,7 @@ void print_map(int length, struct node **head1){
                 i2 = 0;
                 i4=0;
             }
-                i4++;
+            i4++;
         }
     }
 
@@ -376,35 +380,35 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
             if(check_available_coor(first_row, min_column, max_column, 1, head2) == 0 &&
                check_available_coor(first_column, min_row, max_row, 2, head1) == 0 ) {
                 i = min_column;
-                insert_coordinates(first_row, i - 1, ship_num, head2);
+                insert_coordinates(first_row, i - 1, ship_num, length, head2);
 
                 for (; i <= max_column; i++) {
-                    insert_coordinates(first_row, i, ship_num, head1);
-                    insert_coordinates(first_row + 1, i, ship_num, head2);
-                    insert_coordinates(first_row - 1, i, ship_num, head2);
+                    insert_coordinates(first_row, i, ship_num, length, head1);
+                    insert_coordinates(first_row + 1, i, ship_num, length, head2);
+                    insert_coordinates(first_row - 1, i, ship_num, length, head2);
                 }
-                insert_coordinates(first_row, i, ship_num, head2);
+                insert_coordinates(first_row, i, ship_num, length, head2);
             }
             else{
                 printf("\nYou cannot place a ship here...\nTry Again\n\n");
                 get_coordinates(length, ship_num, head1, head2);
-                }
+            }
 
         }
 
         else if (first_column == end_column && (max_row - min_row + 1) == length) {
 
             if(check_available_coor(first_column, min_row, max_row, 2, head2) == 0 &&
-            check_available_coor(first_column, min_row, max_row, 2, head1) == 0  ) {
+               check_available_coor(first_column, min_row, max_row, 2, head1) == 0  ) {
                 i = min_row;
-                insert_coordinates(i - 1, first_column, ship_num, head2);
+                insert_coordinates(i - 1, first_column, ship_num,length, head2);
 
                 for (; i <= max_row; i++) {
-                    insert_coordinates(i, first_column, ship_num, head1);
-                    insert_coordinates(i, first_column + 1, ship_num, head2);
-                    insert_coordinates(i, first_column - 1, ship_num, head2);
+                    insert_coordinates(i, first_column, ship_num, length, head1);
+                    insert_coordinates(i, first_column + 1, ship_num, length, head2);
+                    insert_coordinates(i, first_column - 1, ship_num, length, head2);
                 }
-                insert_coordinates(i, first_column, ship_num, head2);
+                insert_coordinates(i, first_column, ship_num, length, head2);
             }
 
             else {
@@ -438,14 +442,14 @@ void attack_coordinates(struct node **head) {
 
 
     if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
-            if(search_linked(head, inner_row, inner_column) == false) {
-                insert_coordinates(inner_row, inner_column, counter, head);
-            }
-            else{
-                printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-                    attack_coordinates(head);
-                }
+        if(search_linked(head, inner_row, inner_column) == false) {
+            insert_coordinates(inner_row, inner_column, counter, 0, head);
         }
+        else{
+            printf("\nYou've already hit this coordinate...\nTry Again\n\n");
+            attack_coordinates(head);
+        }
+    }
 
 
     else{
@@ -455,12 +459,13 @@ void attack_coordinates(struct node **head) {
     counter++;
 }
 
-void insert_coordinates( int inner_row,int inner_column,int ship_num, struct node **head){
+void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_length, struct node **head){
     struct node *link = (struct node*) malloc(sizeof(struct node));
 
     link->row_coor = inner_row;
     link->column_coor = inner_column;
     link->ship_num = ship_num;
+    link->ship_length = ship_length;
 
     link->next = *head;
     *head = link;
