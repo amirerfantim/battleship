@@ -20,11 +20,14 @@ struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head_atkp1 = NULL; // coordinates that player1 attacked
 struct node *head_desp1 = NULL; // ship coordinates that player  1 destroyed
+struct node *water_p1 = NULL; // water around destroyed ship
 
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
 struct node *head_atkp2 = NULL; // coordinates that player2 attacked
 struct node *head_desp2 = NULL; // ship coordinates that player 2 destroyed
+struct node *water_p2 = NULL; // water around destroyed ship
+
 
 
 void printList(struct node **head) {
@@ -72,15 +75,15 @@ int main() {
     //main_menu();
     get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
-    /*
-    while(head1_p1 != NULL) {
-        attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
-        print_atk_map(&head_atkp1, &head1_p1, &head_desp1);
-    }
-     */
-    printList(&head2_p1);
     cleanup_list(&head2_p1);
-    printList(&head2_p1);
+
+    while(head1_p1 != NULL) {
+        attack_coordinates(&head_atkp1, &head1_p1, &head_desp1, &water_p1, &head2_p1);
+        print_atk_map(&head_atkp1, &head1_p1, &head_desp1, &water_p1);
+    }
+
+    //printList(&water_p1);
+    printList(&head_desp1);
 /*
     printList(&head_desp1);
     printList(&head_atkp1);
@@ -184,10 +187,11 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(11, head1);
+
     get_coordinates(2, 4, head1, head2);
     system("cls");
     print_map(13, head1);
-    */
+     */
     countdown(5);
     system("cls");
 
@@ -306,7 +310,7 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
     int des_length = length(destroy), des_row[des_length], des_col[des_length];
     int water_length = length(water), wat_row[water_length], wat_col[water_length];
 
-
+    printf("   ");
 
     for(i1 = 0; i1 < inner_length; i1++){
         splitted_row[i1] = coor_spliter(i1, 1, attack);
@@ -347,56 +351,80 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
     int i4 =0, j2 = 0;
     j1 =0;
     bool hit_or_not;
-    for (i1 = 0; i1 < row; i1++) {
-        for (i2 = 0; i2 < column; i2++) {
-            if (splitted_row[j1] == 1 && splitted_col[j1] == 1) {
-                hit_or_not = search_linked(ships, 1, 1);
-                if (hit_or_not == true) {
-                    hit_spots[0][0] = 'E';
-                }
-                if (hit_or_not == false) {
-                    hit_spots[0][0] = 'W';
-                }
+    if(inner_length > 0) {
+        for (i1 = 0; i1 < row; i1++) {
+            for (i2 = 0; i2 < column; i2++) {
+                if (splitted_row[j1] == 1 && splitted_col[j1] == 1) {
+                    hit_or_not = search_linked(ships, 1, 1);
+                    if (hit_or_not == true) {
+                        hit_spots[0][0] = 'E';
+                    }
+                    if (hit_or_not == false) {
+                        hit_spots[0][0] = 'W';
+                    }
 
-                j1++;
-            } else if (splitted_row[j1] == i1 + 1 && splitted_col[j1] == i2 + 1) {
-                hit_or_not = search_linked(ships, i1 + 1, i2 + 1);
-                if (hit_or_not == true) {
-                    hit_spots[i1][i2] = 'E';
+                    j1++;
+                } else if (splitted_row[j1] == i1 + 1 && splitted_col[j1] == i2 + 1) {
+                    hit_or_not = search_linked(ships, i1 + 1, i2 + 1);
+                    if (hit_or_not == true) {
+                        hit_spots[i1][i2] = 'E';
+                    }
+                    if (hit_or_not == false ) {
+                        hit_spots[i1][i2] = 'W';
+                    }
+                    j1++;
+                    i1 = 0;
+                    i2 = 0;
+                    // i4 = 0;
                 }
-                if (hit_or_not == false) {
+            }
+            // i4++;
+        }
+    }
+
+
+
+    j2 = 0;
+    if(water_length > 0) {
+        for (i1 = 0; i1 < row; i1++) {
+            for (i2 = 0; i2 < column; i2++) {
+                if (wat_row[j2] == 1 && wat_col[j2] == 1 ) {
+                    hit_spots[0][0] = 'W';
+                    j2++;
+                } else if (wat_row[j2] == i1 + 1 && wat_col[j2] == i2 + 1 ) {
                     hit_spots[i1][i2] = 'W';
+                    j2++;
+                    i1 = 0;
+                    i2 = 0;
                 }
-                j1++;
-                i1 = 0;
-                i2 = 0;
-                // i4 = 0;
             }
         }
-        // i4++;
     }
+
+    j2 = 0 ;
     if(des_length > 0) {
         for (i1 = 0; i1 < row; i1++) {
             for (i2 = 0; i2 < column; i2++) {
-                    if (des_row[j2] == 1 && des_col[j2] == 1) {
-                        hit_spots[0][0] = 'C';
-                        j2++;
-                    } else if (des_row[j2] == i1 + 1 && des_col[j2] == i2 + 1) {
-                        hit_spots[i1][i2] = 'C';
-                        j2++;
-                        i1 = 0;
-                        i2 = 0;
-                    }
+                if (des_row[j2] == 1 && des_col[j2] == 1 ) {
+                    hit_spots[0][0] = 'C';
+                    j2++;
+                } else if (des_row[j2] == i1 + 1 && des_col[j2] == i2 + 1 ) {
+                    hit_spots[i1][i2] = 'C';
+                    j2++;
+                    i1 = 0;
+                    i2 = 0;
+                }
             }
         }
     }
-
+/*
     for(int loop1 = 0; loop1 < row; loop1++){
         for(int loop2 = 0; loop2 < column; loop2++ ) {
             printf("%c", hit_spots[loop1][loop2]);
         }
     }
     printf("\n");
+    */
 
 
     i4 = 0;
@@ -441,6 +469,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
                check_available_coor(first_column, min_row, max_row, 2, head1) == 0 ) {
                 i = min_column;
                 insert_coordinates(first_row, i - 1, ship_num, length, head2);
+                insert_coordinates(first_row-1, i - 1, ship_num, length, head2);
+                insert_coordinates(first_row+1, i - 1, ship_num, length, head2);
 
                 for (; i <= max_column; i++) {
                     insert_coordinates(first_row, i, ship_num, length, head1);
@@ -448,6 +478,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
                     insert_coordinates(first_row - 1, i, ship_num, length, head2);
                 }
                 insert_coordinates(first_row, i, ship_num, length, head2);
+                insert_coordinates(first_row+1, i, ship_num, length, head2);
+                insert_coordinates(first_row-1, i, ship_num, length, head2);
             }
             else{
                 printf("\nYou cannot place a ship here...\nTry Again\n\n");
@@ -462,6 +494,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
                check_available_coor(first_column, min_row, max_row, 2, head1) == 0  ) {
                 i = min_row;
                 insert_coordinates(i - 1, first_column, ship_num,length, head2);
+                insert_coordinates(i - 1, first_column+1, ship_num,length, head2);
+                insert_coordinates(i - 1, first_column-1, ship_num,length, head2);
 
                 for (; i <= max_row; i++) {
                     insert_coordinates(i, first_column, ship_num, length, head1);
@@ -469,6 +503,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
                     insert_coordinates(i, first_column - 1, ship_num, length, head2);
                 }
                 insert_coordinates(i, first_column, ship_num, length, head2);
+                insert_coordinates(i, first_column+1, ship_num, length, head2);
+                insert_coordinates(i, first_column-1, ship_num, length, head2);
             }
 
             else {
@@ -491,7 +527,8 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
 }
 
 // if head==p1 then ships==p2
-void attack_coordinates(struct node **attack, struct node **ships2, struct node **destroy) {
+void attack_coordinates(struct node **attack, struct node **ships2, struct node **destroy,
+        struct node** water, struct node **all_water) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column;
 
@@ -516,14 +553,14 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
         }
         else{
             printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-            attack_coordinates(attack, ships2, destroy);
+            attack_coordinates(attack, ships2, destroy, water, all_water);
         }
     }
 
 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
-        attack_coordinates(attack, ships2, destroy);
+        attack_coordinates(attack, ships2, destroy, water, all_water);
     }
 
     int check_destroyed = 0;
@@ -532,6 +569,7 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
     }
     if(check_destroyed == 1){
         find_add(ship_num, attack, ships2, destroy);
+        find_add(ship_num, all_water, all_water, water );
     }
 }
 
