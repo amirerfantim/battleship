@@ -18,12 +18,13 @@ struct node {
 
 struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
-struct node *head_atkp1 = NULL; // coor that player1 attacked
-struct node *head_desp1 = NULL; // coor that player1 attacked
+struct node *head_atkp1 = NULL; // coordinates that player1 attacked
+struct node *head_desp1 = NULL; // ship coordinates that player  1 destroyed
 
 struct node *head1_p2 = NULL; // ship coordinates
 struct node *head2_p2 = NULL; // forbidden coordinates
-struct node *head2_atkp2 = NULL; // coor that player2 attacked
+struct node *head_atkp2 = NULL; // coordinates that player2 attacked
+struct node *head_desp2 = NULL; // ship coordinates that player 2 destroyed
 
 
 void printList(struct node **head) {
@@ -56,9 +57,11 @@ void WriteListToFile();
 int length();
 int counter_linked();
 int counter_shipnum();
+void find_add();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct node *find();
+struct node* delete();
 bool search_linked();
 
 
@@ -68,8 +71,17 @@ int main() {
     get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
     attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
     attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
     attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
+    attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
+    print_atk_map(&head_atkp1,&head1_p1, &head_desp1);
+
+    printList(&head_desp1);
+    printList(&head_atkp1);
+    printList(&head1_p1);
 }
 
 void main_menu(){
@@ -279,17 +291,25 @@ void print_map(int length, struct node **head1){
     }
 }
 
-void print_atk_map(struct node **head1, struct node **ships){
+void print_atk_map(struct node **attack, struct node **ships, struct node **destroy){
 
-    int i1, i2, i3, col_counter = 1,inner_length = length(head1), j ;
+    int i1, i2, i3, col_counter = 1,inner_length = length(attack), j1 ;
     int splitted_row[inner_length], splitted_col[inner_length];
 
+    int des_length = length(destroy), des_row[des_length], des_col[des_length];
 
     for(i1 = 0; i1 < inner_length; i1++){
-        splitted_row[i1] = coor_spliter(i1, 1, head1);
-        splitted_col[i1] = coor_spliter(i1, 2, head1);
+        splitted_row[i1] = coor_spliter(i1, 1, attack);
+        splitted_col[i1] = coor_spliter(i1, 2, attack);
         printf("%d %d\n",splitted_row[i1], splitted_col[i1] );
     }
+/*
+    for(i1 = 0; i1 < des_length; i1++){
+        splitted_row[i1] = coor_spliter(i1, 1, destroy);
+        splitted_col[i1] = coor_spliter(i1, 2, destroy);
+        printf("%d %d\n",des_row[i1], des_col[i1] );
+    }
+    */
 
     printf("   ");
 
@@ -308,35 +328,34 @@ void print_atk_map(struct node **head1, struct node **ships){
         hit_spots[i1] = ' ';
     }
 
-    int i4 =0;
-    j =0;
+    int i4 =0, j2 = 0;
+    j1 =0;
     bool hit_or_not;
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
-            if(splitted_row[j] == 1 && splitted_col[j] == 1){
-                hit_or_not = search_linked(ships, 1, 1);
-                if( hit_or_not == true){
-                    hit_spots[0] = 'E';
-                }
-                if(hit_or_not == false){
-                    hit_spots[0] = 'W';
-                }
+                if (splitted_row[j1] == 1 && splitted_col[j1] == 1) {
+                    hit_or_not = search_linked(ships, 1, 1);
+                    if (hit_or_not == true) {
+                        hit_spots[0] = 'E';
+                    }
+                    if (hit_or_not == false) {
+                        hit_spots[0] = 'W';
+                    }
 
-                j++;
-            }
-            else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
-                hit_or_not =search_linked(ships, i1+1, i2+1);
-                if(hit_or_not == true){
-                    hit_spots[i4] = 'E';
+                    j1++;
+                } else if (splitted_row[j1] == i1 + 1 && splitted_col[j1] == i2 + 1) {
+                    hit_or_not = search_linked(ships, i1 + 1, i2 + 1);
+                    if (hit_or_not == true) {
+                        hit_spots[i4] = 'E';
+                    }
+                    if (hit_or_not == false) {
+                        hit_spots[i4] = 'W';
+                    }
+                    j1++;
+                    i1 = 0;
+                    i2 = 0;
+                    i4 = 0;
                 }
-                if(hit_or_not == false){
-                    hit_spots[i4] = 'W';
-                }
-                j++;
-                i1 = 0;
-                i2 = 0;
-                i4=0;
-            }
             i4++;
         }
     }
@@ -456,11 +475,6 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
         ship_length = search_result->ship_length;
     }
 
-    int check_destroyed;
-    if(hit_or_not != 0){
-        check_destroyed = destroyed_ship(ship_num, ship_length, destroy, attack);
-    }
-
     if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
         if(search_linked(attack, inner_row, inner_column) == false) {
             insert_coordinates(inner_row, inner_column, ship_num, ship_length, attack);
@@ -475,6 +489,14 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
         attack_coordinates(attack, ships2, destroy);
+    }
+
+    int check_destroyed = 0;
+    if(hit_or_not != 0){
+        check_destroyed = destroyed_ship(ship_num, ship_length, attack);
+    }
+    if(check_destroyed == 1){
+        find_add(ship_num, attack, destroy);
     }
 }
 
@@ -493,6 +515,7 @@ void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_le
 int destroyed_ship(int ship_num,int ship_length,  struct node** attack){
     int counter = 0;
     counter = counter_shipnum(attack, ship_num);
+
     if(counter == ship_length){
         return 1;
     }
@@ -656,6 +679,48 @@ struct node* find(int inner_row,int inner_col, struct node** head1) {
         } else {
             current = current->next;
         }
+    }
+
+    return current;
+}
+
+void find_add(int key, struct node** head1, struct node** add) {
+
+    struct node* current = *head1;
+
+    while(current != NULL) {
+        if(current->ship_num == key){
+            insert_coordinates(current->row_coor,current->column_coor, current->ship_num, current->ship_length, add);
+        }
+        current = current->next;
+    }
+
+
+}
+
+struct node* delete(int key, struct node** head1) {
+
+    struct node* current = *head1;
+    struct node* previous = NULL;
+
+    if(*head1 == NULL) {
+        return NULL;
+    }
+
+    while(current->ship_num != key) {
+
+        if(current->next == NULL) {
+            return NULL;
+        } else {
+            previous = current;
+            current = current->next;
+        }
+    }
+
+    if(current == *head1) {
+        *head1 = (*head1)->next;
+    } else {
+        previous->next = current->next;
     }
 
     return current;
