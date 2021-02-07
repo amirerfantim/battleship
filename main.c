@@ -250,9 +250,11 @@ void print_map(int length, struct node **head1){
     }
 
     printf("\n");
-    char show_ship[row * column+1] ;
-    for(i1 = 0; i1 <= row * column; i1++){
-        show_ship[i1] = ' ';
+    char show_ship[row+1][column+1]  ;
+    for(i1 = 0; i1 <= row ; i1++){
+        for(i2 = 0; i2 <= column; i2++) {
+            show_ship[i1][i2] = ' ';
+        }
     }
 
     int i4 =0;
@@ -260,17 +262,17 @@ void print_map(int length, struct node **head1){
     for (i1 = 0; i1 < row; i1++) {
         for (i2 = 0; i2 < column; i2++) {
             if(splitted_row[j] == 1 && splitted_col[j] == 1){
-                show_ship[0] = 'S';
+                show_ship[0][0] = 'S';
                 j++;
             }
             else if(splitted_row[j] == i1 + 1 && splitted_col[j] == i2 + 1) {
-                show_ship[i4] = 'S';
+                show_ship[i1][i2] = 'S';
                 j++;
                 i1 = 0;
                 i2 = 0;
-                i4=0;
+                //i4=0;
             }
-            i4++;
+           // i4++;
         }
     }
 
@@ -278,8 +280,8 @@ void print_map(int length, struct node **head1){
     for(i1 = 0; i1 < row; i1++){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < column; i2++){
-            printf("| %c ", show_ship[i4]);
-            i4++;
+            printf("| %c ", show_ship[i1][i2]);
+            //i4++;
         }
 
         printf("|\n   ");
@@ -301,7 +303,7 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
     for(i1 = 0; i1 < inner_length; i1++){
         splitted_row[i1] = coor_spliter(i1, 1, attack);
         splitted_col[i1] = coor_spliter(i1, 2, attack);
-        printf("%d %d\n",splitted_row[i1], splitted_col[i1] );
+        //printf("%d %d\n",splitted_row[i1], splitted_col[i1] );
     }
 /*
     for(i1 = 0; i1 < des_length; i1++){
@@ -323,9 +325,11 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
     }
 
     printf("\n");
-    char hit_spots[row * column+1] ;
-    for(i1 = 0; i1 <= row * column; i1++){
-        hit_spots[i1] = ' ';
+    char hit_spots[row+1][column+1] ;
+    for(i1 = 0; i1 <= row ; i1++){
+        for(i2 = 0; i2 <= column; i2++) {
+            hit_spots[i1][i2] = ' ';
+        }
     }
 
     int i4 =0, j2 = 0;
@@ -336,20 +340,20 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
                 if (splitted_row[j1] == 1 && splitted_col[j1] == 1) {
                     hit_or_not = search_linked(ships, 1, 1);
                     if (hit_or_not == true) {
-                        hit_spots[0] = 'E';
+                        hit_spots[0][0] = 'E';
                     }
                     if (hit_or_not == false) {
-                        hit_spots[0] = 'W';
+                        hit_spots[0][0] = 'W';
                     }
 
                     j1++;
                 } else if (splitted_row[j1] == i1 + 1 && splitted_col[j1] == i2 + 1) {
                     hit_or_not = search_linked(ships, i1 + 1, i2 + 1);
                     if (hit_or_not == true) {
-                        hit_spots[i4] = 'E';
+                        hit_spots[i1][i2] = 'E';
                     }
                     if (hit_or_not == false) {
-                        hit_spots[i4] = 'W';
+                        hit_spots[i1][i2] = 'W';
                     }
                     j1++;
                     i1 = 0;
@@ -359,17 +363,18 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
             i4++;
         }
     }
-
+/*
     for(int loop = 0; loop < 100; loop++){
         printf("%c", hit_spots[loop]);
     }
     printf("\n");
+    */
 
     i4 = 0;
     for(i1 = 0; i1 < row; i1++){
         printf("%3d", i1+1);
         for(i2 = 0; i2 < column; i2++){
-            printf("| %c ", hit_spots[i4]);
+            printf("| %c ", hit_spots[i1][i2]);
             i4++;
         }
 
