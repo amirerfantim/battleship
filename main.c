@@ -58,10 +58,12 @@ int length();
 int counter_linked();
 int counter_shipnum();
 void find_add();
+void cleanup_list();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct node *find();
-struct node* delete();
+struct node* delete_1var();
+struct node* delete_2var();
 bool search_linked();
 
 
@@ -70,15 +72,20 @@ int main() {
     //main_menu();
     get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
+    /*
     while(head1_p1 != NULL) {
         attack_coordinates(&head_atkp1, &head1_p1, &head_desp1);
         print_atk_map(&head_atkp1, &head1_p1, &head_desp1);
     }
-
-
+     */
+    printList(&head2_p1);
+    cleanup_list(&head2_p1);
+    printList(&head2_p1);
+/*
     printList(&head_desp1);
     printList(&head_atkp1);
     printList(&head1_p1);
+    */
 }
 
 void main_menu(){
@@ -171,11 +178,12 @@ void get_ship(struct node **head1, struct node **head2){
     system("cls");
     print_map(8, head1);
 
+
+    //WriteListToFile(head1_p1, 1, 1);
+/*
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(11, head1);
-    //WriteListToFile(head1_p1, 1, 1);
-/*
     get_coordinates(2, 4, head1, head2);
     system("cls");
     print_map(13, head1);
@@ -291,12 +299,12 @@ void print_map(int length, struct node **head1){
     }
 }
 
-void print_atk_map(struct node **attack, struct node **ships, struct node **destroy){
+void print_atk_map(struct node **attack, struct node **ships, struct node **destroy, struct node **water){
 
     int i1, i2, i3, col_counter = 1,inner_length = length(attack), j1 ;
     int splitted_row[inner_length], splitted_col[inner_length];
-
     int des_length = length(destroy), des_row[des_length], des_col[des_length];
+    int water_length = length(water), wat_row[water_length], wat_col[water_length];
 
 
 
@@ -312,7 +320,12 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
         //printf("%d %d\n",des_row[i1], des_col[i1] );
     }
 
-    printf("   ");
+    for(i1 = 0; i1 < water_length; i1++){
+        wat_row[i1] = coor_spliter(i1, 1, water);
+        wat_col[i1] = coor_spliter(i1, 2, water);
+        //printf("%d %d\n",des_row[i1], des_col[i1] );
+    }
+
 
     for(i3 = 0; i3 < 4*column; i3++) {
         if((i3 +2) % 4 == 0) {
@@ -377,7 +390,6 @@ void print_atk_map(struct node **attack, struct node **ships, struct node **dest
             }
         }
     }
-
 
     for(int loop1 = 0; loop1 < row; loop1++){
         for(int loop2 = 0; loop2 < column; loop2++ ) {
@@ -714,7 +726,7 @@ void find_add(int key, struct node** head1,struct node** del, struct node** add)
     while(current != NULL) {
         if(current->ship_num == key){
             insert_coordinates(current->row_coor,current->column_coor, current->ship_num, current->ship_length, add);
-            delete(key, del);
+            delete_1var(key, del);
         }
         current = current->next;
     }
@@ -722,7 +734,17 @@ void find_add(int key, struct node** head1,struct node** del, struct node** add)
 
 }
 
-struct node* delete(int key, struct node** head1) {
+void cleanup_list(struct node **head) {
+    struct node *ptr = *head;
+    while (ptr != NULL) {
+        if(ptr->row_coor > 10 || ptr->row_coor < 1 || ptr->column_coor > 10 || ptr->column_coor < 1){
+            delete_2var(ptr->row_coor, ptr->column_coor, head);
+        }
+        ptr = ptr->next;
+    }
+}
+
+struct node* delete_1var(int key, struct node** head1) {
 
     struct node* current = *head1;
     struct node* previous = NULL;
@@ -732,6 +754,34 @@ struct node* delete(int key, struct node** head1) {
     }
 
     while(current->ship_num != key) {
+
+        if(current->next == NULL) {
+            return NULL;
+        } else {
+            previous = current;
+            current = current->next;
+        }
+    }
+
+    if(current == *head1) {
+        *head1 = (*head1)->next;
+    } else {
+        previous->next = current->next;
+    }
+
+    return current;
+}
+
+struct node* delete_2var(int key,int data, struct node** head1) {
+
+    struct node* current = *head1;
+    struct node* previous = NULL;
+
+    if(*head1 == NULL) {
+        return NULL;
+    }
+
+    while(current->row_coor != key || current->column_coor != data) {
 
         if(current->next == NULL) {
             return NULL;
