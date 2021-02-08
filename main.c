@@ -67,6 +67,7 @@ void find_add();
 void cleanup_list();
 void cleanup_all();
 void two_player_game();
+void play_with_bot();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct node *find();
@@ -78,9 +79,19 @@ bool search_linked();
 int main() {
     srand(time(0));
     system("cls");
-    get_random_ship(&head1_p1, &head2_p1);
-    print_map(21, &head1_p1);
-    cleanup_all();
+    //get_random_ship(&head1_p1, &head2_p1);
+    //two_player_game();
+    //play_with_bot();
+    //WriteListToFile(&head1_p1);
+    ReadListIn(&head1_p1);
+    print_map(10, &head1_p1);
+    printList(&head1_p1);
+    /*
+    random_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
+    random_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
+    printList(&head_atkp1);
+     */
+    //cleanup_all();
     //main_menu();
     //cleanup_list(&head2_p1);
     //cleanup_list(&head2_p2);
@@ -90,19 +101,63 @@ int main() {
 void two_player_game(){
     get_ship(&head1_p1, &head2_p1);
     get_ship(&head1_p2, &head2_p2);
+    cleanup_all();
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\nPlayer 1 Turn:\n");
-        attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2);
+        attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
         system("cls");
 
+        if(head1_p2 == NULL){
+            break;
+        }
+
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         printf("\nPlayer 2 Turn:\n");
-        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1);
+        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
+        system("cls");
+        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        countdown(2);
+        system("cls");
+    }
+
+    if(head1_p1 == NULL){
+        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        printf("\nPlayer 2 WON!\nCongratulations!\n");
+    }
+
+    if(head1_p2 == NULL){
+        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        printf("\nPlayer 1 WON!\nCongratulations!\n");
+    }
+
+}
+
+void play_with_bot(){
+    get_ship(&head1_p1, &head2_p1);
+    get_random_ship(&head1_p2, &head2_p2);
+    cleanup_all();
+
+    while(head1_p1 != NULL && head1_p2 != NULL) {
+        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        printf("\nPlayer 1 Turn:\n");
+        attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
+        system("cls");
+        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        countdown(2);
+        system("cls");
+
+        if(head1_p2 == NULL){
+            break;
+        }
+
+        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        printf("\nPlayer 2 Turn:\n");
+        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
         system("cls");
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         countdown(2);
@@ -660,6 +715,7 @@ void get_random_ship(struct node **head1, struct node **head2){
     random_coordinates(4, 1, head1, head2);
     random_coordinates(3, 2, head1, head2);
     random_coordinates(3, 3, head1, head2);
+    /*
     random_coordinates(2, 4, head1, head2);
     random_coordinates(2, 5, head1, head2);
     random_coordinates(2, 6, head1, head2);
@@ -667,21 +723,29 @@ void get_random_ship(struct node **head1, struct node **head2){
     random_coordinates(1, 8, head1, head2);
     random_coordinates(1, 9, head1, head2);
     random_coordinates(1, 10, head1, head2);
+     */
 
     system("cls");
 }
 
 // if head==p1 then ships==p2
+// if rand_or_not == 1 ->random if == 0 ->manual
 void attack_coordinates(struct node **attack, struct node **ships2, struct node **destroy,
-        struct node** water, struct node **all_water) {
+        struct node** water, struct node **all_water, int rand_or_not) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column;
 
-    printf("enter row number: ");
-    scanf("%d", &inner_row);
-    printf("enter column number: ");
-    scanf("%d", &inner_column);
-    fflush(stdin);
+    if(rand_or_not == 0) {
+        printf("enter row number: ");
+        scanf("%d", &inner_row);
+        printf("enter column number: ");
+        scanf("%d", &inner_column);
+        fflush(stdin);
+
+    }else{
+        inner_row = (rand() % row) + 1;
+        inner_column = (rand() % column) +1;
+    }
 
     int hit_or_not = counter_linked(ships2, inner_row, inner_column);
     int ship_num = 0, ship_length = 0;
@@ -698,14 +762,14 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
         }
         else{
             printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-            attack_coordinates(attack, ships2, destroy, water, all_water);
+            attack_coordinates(attack, ships2, destroy, water, all_water, rand_or_not);
         }
     }
 
 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
-        attack_coordinates(attack, ships2, destroy, water, all_water);
+        attack_coordinates(attack, ships2, destroy, water, all_water, rand_or_not);
     }
 
     int check_destroyed = 0;
@@ -777,8 +841,11 @@ int counter_shipnum(struct node** head1, int key){
     return counter;
 }
 
-void WriteListToFile(struct node* start,char filename1[25]) {
+void WriteListToFile(struct node* start) {
     FILE *pFile;
+    char filename1[25];
+    scanf("%s", filename1);
+    fflush(stdin);
     strcat(filename1, ".bin");
     pFile = fopen(filename1, "wb");
 
@@ -830,11 +897,15 @@ struct node *ReadNextFromFile(struct node *start, FILE *pFile) {
     return start;
 }
 
-struct node *ReadListIn(struct node **start, char filename1[25]) {
+struct node *ReadListIn(struct node **start) {
 
     FILE *pFile;
+    char filename1[25];
+    scanf("%s", filename1);
+    fflush(stdin);
     strcat(filename1, ".bin");
     pFile = fopen(filename1, "rb");
+
     if(pFile != NULL) {
 
         //CleanUp(*start);
