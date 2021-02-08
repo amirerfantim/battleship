@@ -4,6 +4,7 @@
 #include <conio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <time.h>
 
 #define row 10
 #define column 10
@@ -30,7 +31,6 @@ struct node *head_desp2 = NULL; // ship coordinates that player 2 destroyed
 struct node *water_p2 = NULL; // water around destroyed ship
 
 
-
 void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
@@ -53,6 +53,8 @@ void countdown();
 void get_coordinates();
 void attack_coordinates();
 void insert_coordinates();
+void random_coordinates();
+void get_random_ship();
 void get_ship();
 int destroyed_ship();
 int coor_spliter();
@@ -63,6 +65,8 @@ int counter_linked();
 int counter_shipnum();
 void find_add();
 void cleanup_list();
+void cleanup_all();
+void two_player_game();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct node *find();
@@ -72,13 +76,20 @@ bool search_linked();
 
 
 int main() {
+    srand(time(0));
     system("cls");
+    get_random_ship(&head1_p1, &head2_p1);
+    print_map(21, &head1_p1);
+    cleanup_all();
     //main_menu();
+    //cleanup_list(&head2_p1);
+    //cleanup_list(&head2_p2);
 
+}
+
+void two_player_game(){
     get_ship(&head1_p1, &head2_p1);
     get_ship(&head1_p2, &head2_p2);
-    cleanup_list(&head2_p1);
-    cleanup_list(&head2_p2);
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
@@ -97,15 +108,16 @@ int main() {
         countdown(2);
         system("cls");
     }
+
     if(head1_p1 == NULL){
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         printf("\nPlayer 2 WON!\nCongratulations!\n");
     }
+
     if(head1_p2 == NULL){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\nPlayer 1 WON!\nCongratulations!\n");
     }
-
 
 }
 
@@ -191,17 +203,17 @@ void countdown(int duration){
 }
 
 void get_ship(struct node **head1, struct node **head2){
-    get_coordinates(5, 1, head1, head2);
+    get_coordinates(4, 1, head1, head2);
     system("cls");
-    print_map(5, head1);
+    print_map(4, head1);
 
     get_coordinates(3, 2, head1, head2);
     system("cls");
-    print_map(8, head1);
+    print_map(7, head1);
 
     get_coordinates(3, 3, head1, head2);
     system("cls");
-    print_map(11, head1);
+    print_map(10, head1);
 /*
     get_coordinates(2, 4, head1, head2);
     system("cls");
@@ -521,7 +533,7 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
     if(max_row <= row && max_column <= column && min_row > 0 && min_column > 0) {
         if (first_row == end_row && ( max_column - min_column + 1) == length) {
             if(check_available_coor(first_row, min_column, max_column, 1, head2) == 0 &&
-               check_available_coor(first_column, min_row, max_row, 2, head1) == 0 ) {
+               check_available_coor(first_row, min_column, max_column, 1, head1) == 0 ) {
                 i = min_column;
                 insert_coordinates(first_row, i - 1, ship_num, length, head2);
                 insert_coordinates(first_row-1, i - 1, ship_num, length, head2);
@@ -579,6 +591,84 @@ void get_coordinates(int length, int ship_num, struct node **head1, struct node 
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
         get_coordinates(length,ship_num, head1, head2);
     }
+}
+
+void random_coordinates(int length, int ship_num, struct node **head1, struct node **head2) {
+    int first_row, first_column, end_row, end_column, hor_or_vert, i;
+
+    hor_or_vert = rand() % 2;
+    //hor =0= horizontal,  vert =1= vertical
+    if (hor_or_vert == 0) {
+        first_row = end_row = (rand() % row) + 1;
+        first_column = (rand() % (column - length + 1)) + 1;
+        end_column = first_column + length - 1;
+    }
+    if (hor_or_vert == 1) {
+        first_column = end_column = (rand() % column) + 1;
+        first_row = (rand() % (row - length + 1)) + 1;
+        end_row = first_row + length - 1;
+    }
+    //printf("\n[%d] %d %d | %d %d \n", hor_or_vert, first_row, first_column, end_row, end_column );
+    if (first_row == end_row) {
+        if (check_available_coor(first_row, first_column, end_column, 1, head2) == 0 &&
+            check_available_coor(first_row, first_column, end_column, 1, head1) == 0) {
+            i = first_column;
+            insert_coordinates(first_row, i - 1, ship_num, length, head2);
+            insert_coordinates(first_row - 1, i - 1, ship_num, length, head2);
+            insert_coordinates(first_row + 1, i - 1, ship_num, length, head2);
+            for (; i <= end_column; i++) {
+                insert_coordinates(first_row, i, ship_num, length, head1);
+                insert_coordinates(first_row + 1, i, ship_num, length, head2);
+                insert_coordinates(first_row - 1, i, ship_num, length, head2);
+            }
+            insert_coordinates(first_row, i, ship_num, length, head2);
+            insert_coordinates(first_row + 1, i, ship_num, length, head2);
+            insert_coordinates(first_row - 1, i, ship_num, length, head2);
+        } else {
+            random_coordinates(length, ship_num, head1, head2);
+        }
+
+    } else if (first_column == end_column) {
+
+        if (check_available_coor(first_column, first_row, end_row, 2, head2) == 0 &&
+            check_available_coor(first_column, first_row, end_row, 2, head1) == 0) {
+            i = first_row;
+            insert_coordinates(i - 1, first_column, ship_num, length, head2);
+            insert_coordinates(i - 1, first_column + 1, ship_num, length, head2);
+            insert_coordinates(i - 1, first_column - 1, ship_num, length, head2);
+
+            for (; i <= end_row; i++) {
+                insert_coordinates(i, first_column, ship_num, length, head1);
+                insert_coordinates(i, first_column + 1, ship_num, length, head2);
+                insert_coordinates(i, first_column - 1, ship_num, length, head2);
+            }
+            insert_coordinates(i, first_column, ship_num, length, head2);
+            insert_coordinates(i, first_column + 1, ship_num, length, head2);
+            insert_coordinates(i, first_column - 1, ship_num, length, head2);
+        } else {
+
+            random_coordinates(length, ship_num, head1, head2);
+        }
+
+    } else {
+
+        random_coordinates(length, ship_num, head1, head2);
+    }
+}
+
+void get_random_ship(struct node **head1, struct node **head2){
+    random_coordinates(4, 1, head1, head2);
+    random_coordinates(3, 2, head1, head2);
+    random_coordinates(3, 3, head1, head2);
+    random_coordinates(2, 4, head1, head2);
+    random_coordinates(2, 5, head1, head2);
+    random_coordinates(2, 6, head1, head2);
+    random_coordinates(1, 7, head1, head2);
+    random_coordinates(1, 8, head1, head2);
+    random_coordinates(1, 9, head1, head2);
+    random_coordinates(1, 10, head1, head2);
+
+    system("cls");
 }
 
 // if head==p1 then ships==p2
@@ -827,6 +917,11 @@ void cleanup_list(struct node **head) {
         }
         ptr = ptr->next;
     }
+}
+
+void cleanup_all() {
+    cleanup_list(&head2_p1);
+    cleanup_list(&head2_p2);
 }
 
 struct node* delete_1var(int key, struct node** head1) {
