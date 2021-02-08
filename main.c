@@ -68,6 +68,8 @@ void cleanup_list();
 void cleanup_all();
 void two_player_game();
 void play_with_bot();
+void save_game();
+void load_game();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct node *find();
@@ -80,22 +82,80 @@ int main() {
     srand(time(0));
     system("cls");
     //get_random_ship(&head1_p1, &head2_p1);
+    //load_game();
     //two_player_game();
     //play_with_bot();
     //WriteListToFile(&head1_p1);
-    ReadListIn(&head1_p1);
-    print_map(10, &head1_p1);
-    printList(&head1_p1);
-    /*
-    random_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
-    random_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
-    printList(&head_atkp1);
-     */
+    //ReadListIn(&head1_p1);
+    //print_map(10, &head1_p1);
+    //printList(&head1_p1);
+    //save_game();
     //cleanup_all();
     //main_menu();
     //cleanup_list(&head2_p1);
     //cleanup_list(&head2_p2);
 
+}
+
+void save_game(){
+    char user[20], temp[20];
+    printf("enter your file name [maximum of 10 character]: ");
+    scanf("%s", user);
+    printf("\n");
+
+    strcpy(temp, user);
+    WriteListToFile(head1_p1, user, "ship", "p1");
+    strcpy(user, temp);
+    WriteListToFile(head_atkp1, user, "atk", "p1");
+    strcpy(user, temp);
+    WriteListToFile(head_desp1, user, "des", "p1");
+    strcpy(user, temp);
+    WriteListToFile(head2_p1, user, "awat", "p1");
+    strcpy(user, temp);
+    WriteListToFile(water_p1, user, "pwat", "p1");
+    strcpy(user, temp);
+
+    WriteListToFile(head1_p2, user, "ship", "p2");
+    strcpy(user, temp);
+    WriteListToFile(head_atkp2, user, "atk", "p2");
+    strcpy(user, temp);
+    WriteListToFile(head_desp2, user, "des", "p2");
+    strcpy(user, temp);
+    WriteListToFile(head2_p2, user, "awat", "p2");
+    strcpy(user, temp);
+    WriteListToFile(water_p2, user, "pwat", "p2");
+    strcpy(user, temp);
+
+}
+
+void load_game(){
+    char user[20], temp[20];
+    printf("enter your file name [maximum of 10 character]: ");
+    scanf("%s", user);
+    printf("\n");
+
+    strcpy(temp, user);
+    ReadListIn(&head1_p1, user, "ship", "p1");
+    strcpy(user, temp);
+    ReadListIn(&head_atkp1, user, "atk", "p1");
+    strcpy(user, temp);
+    ReadListIn(&head_desp1, user, "des", "p1");
+    strcpy(user, temp);
+    ReadListIn(&head2_p1, user, "awat", "p1");
+    strcpy(user, temp);
+    ReadListIn(&water_p1, user, "pwat", "p1");
+    strcpy(user, temp);
+
+    ReadListIn(&head1_p2, user, "ship", "p2");
+    strcpy(user, temp);
+    ReadListIn(&head_atkp2, user, "atk", "p2");
+    strcpy(user, temp);
+    ReadListIn(&head_desp2, user, "des", "p2");
+    strcpy(user, temp);
+    ReadListIn(&head2_p2, user, "awat", "p2");
+    strcpy(user, temp);
+    ReadListIn(&water_p2, user, "pwat", "p2");
+    strcpy(user, temp);
 }
 
 void two_player_game(){
@@ -841,18 +901,18 @@ int counter_shipnum(struct node** head1, int key){
     return counter;
 }
 
-void WriteListToFile(struct node* start) {
+void WriteListToFile(struct node* start, char filename[], char code[], char player_num[]) {
     FILE *pFile;
-    char filename1[25];
-    scanf("%s", filename1);
-    fflush(stdin);
-    strcat(filename1, ".bin");
-    pFile = fopen(filename1, "wb");
+    strcat(filename, code);
+    strcat(filename, player_num);
+    strcat(filename, ".bin");
+    pFile = fopen(filename, "wb");
 
     if(pFile != NULL) {
         struct node *currentCar = start;
 
         struct node *holdNext = NULL;
+        struct node *holdPrevious = NULL;
 
         while(currentCar != NULL) {
             holdNext = currentCar->next;
@@ -865,6 +925,7 @@ void WriteListToFile(struct node* start) {
             currentCar->next = holdNext;
 
             holdNext = NULL;
+            holdPrevious = NULL;
 
             currentCar = currentCar->next;
         }
@@ -897,15 +958,13 @@ struct node *ReadNextFromFile(struct node *start, FILE *pFile) {
     return start;
 }
 
-struct node *ReadListIn(struct node **start) {
+struct node *ReadListIn(struct node **start, char filename[], char code[], char player_num[]) {
 
     FILE *pFile;
-    char filename1[25];
-    scanf("%s", filename1);
-    fflush(stdin);
-    strcat(filename1, ".bin");
-    pFile = fopen(filename1, "rb");
-
+    strcat(filename, code);
+    strcat(filename, player_num);
+    strcat(filename, ".bin");
+    pFile = fopen(filename, "rb");
     if(pFile != NULL) {
 
         //CleanUp(*start);
