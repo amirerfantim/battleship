@@ -9,6 +9,7 @@
 #define row 10
 #define column 10
 
+int id1, id2;
 
 struct users {
     char username[20];
@@ -52,7 +53,9 @@ void main_menu();
 void show_main_menu();
 void players_menu();
 void show_player_menu();
+void choose_user_menu();
 void show_choose_user();
+void put_ships_menu();
 void show_ships_menu();
 void create_newuser();
 int get_command();
@@ -60,7 +63,7 @@ void print_map();
 void print_atk_map();
 void countdown();
 void get_coordinates();
-void attack_coordinates();
+int attack_coordinates();
 void insert_coordinates();
 void random_coordinates();
 void get_random_ship();
@@ -81,9 +84,10 @@ void two_player_game();
 void play_with_bot();
 void what_player_choose();
 void save_game();
-void load_game();
+int load_game();
 void insert_users();
 void sort();
+void reverse();
 void print_users();
 int length_users();
 struct node *ReadNextFromFile();
@@ -98,13 +102,21 @@ bool search_linked();
 
 int main() {
     srand(time(0));
-    system("cls");
+
     ReadUsersIn(&start1);
-    //main_menu();
-    //load_game();
+    sort(&start1);
+    reverse(&start1);
+
+    system("cls");
+    main_menu();
+    print_users(&start1);
+    printf("\n%d %d\n", id1, id2);
+    WriteUsersToFile(start1);
+    /*
+    load_game();
     print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
     print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-
+*/
 
 /*
     main_menu();
@@ -138,13 +150,22 @@ int main() {
     //cleanup_list(&head2_p2);
 }
 
-void save_game(){
+// bot == 1 human ==2
+void save_game(int bot_or_human){
+
     char user[20], temp[20];
     printf("enter your file name [maximum of 10 character]: ");
     scanf("%s", user);
     printf("\n");
 
     strcpy(temp, user);
+    strcat(user,"data.txt");
+    FILE *fp = fopen(user, "w");
+    fseek(fp,0, SEEK_SET);
+    fprintf(fp,"%d,%d,%d", bot_or_human, id1, id2);
+    fclose(fp);
+
+    strcpy(user, temp);
     WriteListToFile(head1_p1, user, "ship", "p1");
     strcpy(user, temp);
     WriteListToFile(head_atkp1, user, "atk", "p1");
@@ -166,16 +187,31 @@ void save_game(){
     strcpy(user, temp);
     WriteListToFile(water_p2, user, "pwat", "p2");
     strcpy(user, temp);
+    system("cls");
+
+    WriteUsersToFile(&start1);
 
 }
 
-void load_game(){
+int load_game(){
     char user[20], temp[20];
     printf("enter your file name [maximum of 10 character]: ");
     scanf("%s", user);
     printf("\n");
 
     strcpy(temp, user);
+    strcat(user,"data.txt");
+    FILE *fp = fopen(user, "r");
+    fseek(fp,0, SEEK_SET);
+    char parsedLine[102];
+    fgets(parsedLine, 100, fp);
+    int bot_or_human = atoi(strtok(parsedLine, ","));
+    id1 = atoi(strtok(NULL, ","));
+    id2 = atoi(strtok(NULL, ","));
+
+    fclose(fp);
+
+    strcpy(user, temp);
     ReadListIn(&head1_p1, user, "ship", "p1");
     strcpy(user, temp);
     ReadListIn(&head_atkp1, user, "atk", "p1");
@@ -197,6 +233,8 @@ void load_game(){
     strcpy(user, temp);
     ReadListIn(&water_p2, user, "pwat", "p2");
     strcpy(user, temp);
+
+    return bot_or_human;
 }
 
 void two_player_game(){
@@ -207,7 +245,7 @@ void two_player_game(){
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
 
-        printf("\nPlayer 1 Turn:\n1. Attack\t2. Save\t3. Exit\n");
+        printf("\nPlayer 1 Turn:\n1. Attack  2. Save  3. Exit\n");
         what_player_choose(1);
 
         /*
@@ -223,7 +261,7 @@ void two_player_game(){
         }
 
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 1 Turn:\n1. Attack\t2. Save\t3. Exit");
+        printf("\nPlayer 2 Turn:\n1. Attack  2. Save Game  3. Exit\n");
         what_player_choose(2);
         /*
         attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
@@ -247,26 +285,36 @@ void two_player_game(){
 }
 
 void play_with_bot(){
-    get_ship(&head1_p1, &head2_p1);
+    int hit_or_not;
+    //get_ship(&head1_p1, &head2_p1);
     get_random_ship(&head1_p2, &head2_p2);
     cleanup_all();
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\nPlayer 1 Turn:\n");
+        what_player_choose(1);
+        /*
         attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
         system("cls");
+         */
 
         if(head1_p2 == NULL){
             break;
         }
 
-        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 2 Turn:\n");
-        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1);
+        //print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
+                                        , &water_p1, &head2_p1, 1);
+        while(hit_or_not == 1){
+            hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
+                    , &water_p1, &head2_p1, 1);
+            system("cls");
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        }
         system("cls");
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         countdown(2);
@@ -286,26 +334,50 @@ void play_with_bot(){
 }
 // one or two means player1  or player2
 void what_player_choose(int one_or_two){
-    int command;
+    int command, hit_or_not;
     command = get_command();
     if(command == 1 && one_or_two == 1){
-        attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
+        hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                                       &water_p2, &head2_p2, 0);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
+
+        while(hit_or_not == 1 && head1_p2 != NULL){
+            system("cls");
+            printf("\nUse Your Bonus:\n");
+            print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+            hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                                           &water_p2, &head2_p2, 0);
+           system("cls");
+           print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+            countdown(2);
+        }
         system("cls");
     }
 
-    else if(command == 1 && one_or_two == 1){
-        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
+    else if(command == 1 && one_or_two == 2){
+        hit_or_not = attack_coordinates(one_or_two, &head_atkp2, &head1_p1,&head_desp1,
+                                        &water_p1, &head2_p1, 0);
         system("cls");
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         countdown(2);
+        while(hit_or_not == 1 && head1_p1 != NULL){
+            system("cls");
+            printf("\nUse Your Bonus:\n");
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            hit_or_not = attack_coordinates(one_or_two, &head_atkp2, &head1_p1,&head_desp1,
+                                            &water_p1, &head2_p1, 0);
+            system("cls");
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+        }
         system("cls");
     }
 
     else if(command == 2){
-        save_game();
+        save_game(1);
+        what_player_choose(one_or_two);
     }
 
     else if(command == 3){
@@ -324,24 +396,39 @@ void main_menu(){
 
     if(command1 == 1){
         system("cls");
-        players_menu("player 1",&head1_p1, &head2_p1);
+        players_menu("Player 1",1,&head1_p1, &head2_p1);
+
         system("cls");
-        players_menu("player 2",&head1_p2, &head2_p2);
+        players_menu("Player 2",2,&head1_p2, &head2_p2);
+
         two_player_game();
+
     }else if(command1 == 2){
         system("cls");
+        put_ships_menu("Player", 1, &head1_p1, &head1_p2);
         play_with_bot();
+
     }else if (command1 == 3){
         system("cls");
-        load_game();
+        int bot_or_human = load_game();
+        if(bot_or_human == 2) {
+            play_with_bot();
+        }else{
+            two_player_game();
+        }
+
+
     }else if(command1 == 4){
         system("cls");
         sort(&start1);
+        reverse(&start1);
         print_users(&start1);
+
     }else if (command1 == 5){
         system("cls");
         printf("\n\n    GOOD BYE :)\n");
         exit(0);
+
     }else{
         system("cls");
         main_menu();
@@ -365,82 +452,114 @@ int get_command(){
     return  command;
 }
 
-void create_newuser(){
+void create_newuser(int one_or_two) {
     char username[20];
     printf("enter a username [maximum of 15 characters]: ");
     scanf("%s", username);
     printf("Congratulations %s!\n", username);
+
     int id = length_users(&start1) + 1;
+    if(one_or_two == 1){
+        id1 = id;
+    }else if(one_or_two == 2){
+        id2 = id;
+    }
     insert_users(username, 0, id, &start1);
+    find_users(id, one_or_two,0, &start1);
+    WriteUsersToFile(start1);
+
 }
 
 void print_users(struct users **head) {
     struct users *ptr = *head;
     printf("\n\n");
     int i = 1;
-    printf(" Row   Username             Points\n\n");
+    printf(" Row   Username             Points   ID\n\n");
     while (ptr != NULL) {
-        printf("%3d.   %-20s %d\n", i, ptr->username, ptr->points);
+        printf("%3d.   %-20s %-4d     %-3d\n", i, ptr->username, ptr->points, ptr->ID);
         ptr = ptr->next;
         i++;
     }
 }
 
-void players_menu(char player[],struct node** ships,struct node **water){
-    printf("\n%s:\n", player);
-    int command2, command3, command4;
-
+void players_menu(char player[],int one_or_two, struct node** ships,struct node **water){
+    int command;
     system("cls");
+    printf("\n%s:\n", player);
 
-    show_choose_user();
-    command3 = get_command();
-
-    if(command3 == 1){
+    show_player_menu();
+    command = get_command();
+    if(command == 1){
         system("cls");
-        int user_row, id, users_leng;
-
-        print_users(&start1);
-        users_leng = length_users(&start1);
-
-        printf("\nChoose an user (enter row number  to choose): ");
-        scanf("%d", &user_row);
-        if(user_row > users_leng){
-            system("cls");
-            printf("WRONG INPUT!\n");
-            players_menu(player,ships, water);
-        }
-        else{
-            system("cls");
-            id = users_leng - (user_row - 1);
-            find_users(id, 1, &start1, &playing_users);
-        }
+        choose_user_menu(player,one_or_two, ships, water);
+        put_ships_menu(player,one_or_two, ships, water);
     }
-    else if(command3 == 2){
+    else if(command == 2){
         system("cls");
-        create_newuser();
-    }
-    else{
+        put_ships_menu(player,one_or_two, ships, water);
+        choose_user_menu(player,one_or_two, ships, water);
+
+    }else{
         system("cls");
-        printf("WRONG INPUT!\n");
         main_menu();
     }
+}
 
+void put_ships_menu(char player[],int one_or_two, struct node** ships,struct node **water){
+    int command;
     system("cls");
-    show_ships_menu();
-    command4 = get_command();
 
-    if(command4 == 1){
+    show_ships_menu(player);
+    command = get_command();
+
+    if(command == 1){
         system("cls");
         get_random_ship(ships,water);
 
-    }else if(command4 == 2){
+    }else if(command == 2){
         system("cls");
         get_ship(ships, water);
 
     }else {
         system("cls");
         printf("WRONG INPUT!\n");
-        main_menu();
+        players_menu(player,one_or_two, ships, water);
+    }
+}
+
+void choose_user_menu(char player[],int one_or_two, struct node** ships,struct node **water){
+    int command;
+    show_choose_user(player);
+    command = get_command();
+
+    if(command == 1){
+        system("cls");
+        int user_row, id, users_leng;
+
+        print_users(&start1);
+        users_leng = length_users(&start1);
+
+        printf("\nChoose an user (enter ID number  to choose): ");
+        scanf("%d", &user_row);
+        if(user_row > users_leng){
+            system("cls");
+            printf("WRONG INPUT!\n");
+            choose_user_menu(player, one_or_two, ships, water);
+        }
+        else{
+            system("cls");
+            id = user_row;
+            find_users(id, one_or_two,0, &start1);
+        }
+    }
+    else if(command == 2){
+        system("cls");
+        create_newuser(one_or_two);
+    }
+    else{
+        system("cls");
+        printf("WRONG INPUT!\n");
+        players_menu(player,one_or_two, ships, water);
     }
 
 }
@@ -450,13 +569,13 @@ void show_player_menu(){
            "2. Put Ships\n");
 }
 
-void show_choose_user(){
-    printf("1. Choose from available users\n"
-           "2. New user\n");
+void show_choose_user(char player[]){
+    printf("%s:\n1. Choose from available users\n"
+           "2. New user\n", player);
 }
 
-void show_ships_menu(){
-    printf("Put ships:\n1. Auto\n2. Manual\n");
+void show_ships_menu(char player[]){
+    printf("%s:\nPut ships:\n1. Auto\n2. Manual\n", player);
 }
 
 int check_available_coor(int cte, int first, int end, int hor_or_vert, struct node **head2){ // hor =1= horizontal & vert =2= vertical
@@ -496,10 +615,11 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(3, 2, head1, head2);
     system("cls");
     print_map(7, head1);
-
+/*
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(10, head1);
+    */
 /*
     get_coordinates(2, 4, head1, head2);
     system("cls");
@@ -961,7 +1081,7 @@ void get_random_ship(struct node **head1, struct node **head2){
 
 // if head==p1 then ships==p2
 // if rand_or_not == 1 ->random if == 0 ->manual
-void attack_coordinates(struct node **attack, struct node **ships2, struct node **destroy,
+int attack_coordinates(int one_or_two, struct node **attack, struct node **ships2, struct node **destroy,
         struct node** water, struct node **all_water, int rand_or_not) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column;
@@ -993,14 +1113,14 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
         }
         else{
             printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-            attack_coordinates(attack, ships2, destroy, water, all_water, rand_or_not);
+            attack_coordinates(one_or_two,attack, ships2, destroy, water, all_water, rand_or_not);
         }
     }
 
 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
-        attack_coordinates(attack, ships2, destroy, water, all_water, rand_or_not);
+        attack_coordinates(one_or_two, attack, ships2, destroy, water, all_water, rand_or_not);
     }
 
     int check_destroyed = 0;
@@ -1011,6 +1131,18 @@ void attack_coordinates(struct node **attack, struct node **ships2, struct node 
         find_add(ship_num, attack, ships2, destroy);
         find_add(ship_num, all_water, all_water, water );
     }
+    if(hit_or_not != 0 && one_or_two == 1){
+        find_users(id1, 1, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id1, 1, ship_length, &start1, &playing_users);
+        }
+    }else if(hit_or_not != 0 && one_or_two == 2 && rand_or_not == 0){
+        find_users(id2, 2, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id2, 2, ship_length, &start1, &playing_users);
+        }
+    }
+    return hit_or_not;
 }
 
 void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_length, struct node **head){
@@ -1113,7 +1245,7 @@ void WriteListToFile(struct node* start, char filename[], char code[], char play
         }
         fclose(pFile);
         pFile = NULL;
-        printf("* saved *");
+        printf("* saved *\n");
 
     } else {
         printf("FILE OPEN ERROR\n");
@@ -1148,7 +1280,7 @@ void WriteUsersToFile(struct users* start) {
         }
         fclose(pFile);
         pFile = NULL;
-        printf("* saved *");
+        printf("* saved *\n");
 
     } else {
         printf("FILE OPEN ERROR\n");
@@ -1192,7 +1324,6 @@ struct node *ReadListIn(struct node **start, char filename[], char code[], char 
         rewind(pFile);
 
         int numEntries = (int)(fileSize / (sizeof(struct node)));
-        printf("numEntries:%d\n",numEntries);
 
         int loop ;
         for(loop = 0; loop < numEntries; ++loop) {
@@ -1240,7 +1371,7 @@ struct users *ReadUsersIn(struct users **start) {
         rewind(pFile);
 
         int numEntries = (int)(fileSize / (sizeof(struct users)));
-        printf("numEntries:%d\n",numEntries);
+        //printf("numEntries:%d\n",numEntries);
 
         int loop ;
         for(loop = 0; loop < numEntries; ++loop) {
@@ -1317,13 +1448,20 @@ void find_add(int key, struct node** head1,struct node** del, struct node** add)
 }
 
 // if one_or_two =1= player1 | =2= player2   key is ID
-void find_users(int key,int one_or_two ,struct users** head1, struct users** add) {
+void find_users(int key,int one_or_two ,int add_point, struct users** head1, struct users** add) {
 
     struct users* current = *head1;
 
     while(current != NULL) {
         if(current->ID == key){
-            insert_users(current->username, current->points, one_or_two, add);
+            //insert_users(current->username, current->points, one_or_two, add);
+            current->points = current->points + add_point;
+            if(one_or_two == 1){
+                id1 = current->ID;
+            }
+            else if(one_or_two == 2){
+                id2 = current->ID;
+            }
         }
         current = current->next;
     }
@@ -1433,3 +1571,19 @@ void sort(struct users **head) {
         }
     }
 }
+
+void reverse(struct users** head_ref) {
+    struct users* prev   = NULL;
+    struct users* current = *head_ref;
+    struct users* next;
+
+    while (current != NULL) {
+        next  = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+
+    *head_ref = prev;
+}
+
