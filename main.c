@@ -9,14 +9,21 @@
 #define row 10
 #define column 10
 
-char username[20] = "amirerfan";
 
+struct users {
+    char username[20];
+    int points;
+    int ID;
+    struct users *next;
+};
 
 struct node {
-
     int row_coor, column_coor,ship_length, ship_num ; // ship_num equal to hit number in atk list's.
     struct node *next;
 };
+
+struct users *start1;
+struct users *playing_users;
 
 struct node *head1_p1 = NULL; // ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
@@ -43,8 +50,10 @@ void printList(struct node **head) {
 
 void main_menu();
 void show_main_menu();
+void players_menu();
 void show_player_menu();
 void show_choose_user();
+void show_ships_menu();
 void create_newuser();
 int get_command();
 void print_map();
@@ -60,18 +69,26 @@ int destroyed_ship();
 int coor_spliter();
 int check_available_coor();
 void WriteListToFile();
+void WriteUsersToFile();
 int length();
 int counter_linked();
 int counter_shipnum();
 void find_add();
+void find_users();
 void cleanup_list();
 void cleanup_all();
 void two_player_game();
 void play_with_bot();
 void save_game();
 void load_game();
+void insert_users();
+void sort();
+void print_users();
+int length_users();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
+struct users *ReadNextUser();
+struct users *ReadUsersIn();
 struct node *find();
 struct node* delete_1var();
 struct node* delete_2var();
@@ -81,6 +98,25 @@ bool search_linked();
 int main() {
     srand(time(0));
     system("cls");
+    main_menu();
+/*
+    ReadUsersIn(&start1);
+    main_menu();
+    print_users(&playing_users);
+    WriteUsersToFile(start1);
+*/
+    /*
+    sort(&start1);
+    print_users(&start1);
+
+
+    create_newuser();
+    create_newuser();
+    create_newuser();
+
+    print_users(&start1);
+    WriteUsersToFile(start1);
+*/
     //get_random_ship(&head1_p1, &head2_p1);
     //load_game();
     //two_player_game();
@@ -94,7 +130,6 @@ int main() {
     //main_menu();
     //cleanup_list(&head2_p1);
     //cleanup_list(&head2_p2);
-
 }
 
 void save_game(){
@@ -237,21 +272,33 @@ void play_with_bot(){
 }
 
 void main_menu(){
-    int command1, command2, command3;
+    int command1;
     show_main_menu();
     command1 = get_command();
 
     if(command1 == 1){
-        printf("First Player:\n");
-        show_player_menu();
-        command2 = get_command();
-        if(command2 == 1){
-            show_choose_user();
-            command3 = get_command();
-            if(command3 == 2){
-                create_newuser();
-            }
-        }
+        system("cls");
+        players_menu("player 1",&head1_p1, &head2_p1);
+
+        system("cls");
+        players_menu("player 2",&head1_p2, &head2_p2);
+    }else if(command1 == 2){
+        system("cls");
+        play_with_bot();
+    }else if (command1 == 3){
+        system("cls");
+        load_game();
+    }else if(command1 == 4){
+        system("cls");
+        sort(&start1);
+        print_users(&start1);
+    }else if (command1 == 5){
+        system("cls");
+        printf("\n\n    GOOD BYE :)\n");
+        exit(0);
+    }else{
+        system("cls");
+        main_menu();
     }
 
 }
@@ -273,9 +320,90 @@ int get_command(){
 }
 
 void create_newuser(){
-    printf("enter a username [maximum of 20 characters]: ");
+    char username[20];
+    printf("enter a username [maximum of 15 characters]: ");
     scanf("%s", username);
     printf("Congratulations %s!\n", username);
+    int id = length_users(&start1) + 1;
+    insert_users(username, 0, id, &start1);
+}
+
+void print_users(struct users **head) {
+    struct users *ptr = *head;
+    printf("\n\n");
+    int i = 1;
+    printf(" Row   Username             Points\n\n");
+    while (ptr != NULL) {
+        printf("%3d.   %-20s %d\n", i, ptr->username, ptr->points);
+        ptr = ptr->next;
+        i++;
+    }
+}
+
+void players_menu(char player[],struct node** ships,struct node **water){
+    printf("\n%s:\n", player);
+    int command2, command3, command4;
+    show_player_menu();
+    command2 = get_command();
+    if(command2 == 1){
+        system("cls");
+        show_choose_user();
+        command3 = get_command();
+
+        if(command3 == 1){
+            system("cls");
+            int user_row, id, users_leng;
+
+            print_users(&start1);
+            users_leng = length_users(&start1);
+
+            printf("\nChoose an user (enter row number  to choose): ");
+            scanf("%d", &user_row);
+            if(user_row > users_leng){
+                system("cls");
+                printf("WRONG INPUT!\n");
+                players_menu(player,ships, water);
+            }
+            else{
+                system("cls");
+                id = users_leng - (user_row - 1);
+                find_users(id, 1, &start1, &playing_users);
+            }
+        }
+        else if(command3 == 2){
+            system("cls");
+            create_newuser();
+        }
+        else{
+            system("cls");
+            printf("WRONG INPUT!\n");
+            players_menu(player,ships, water);
+        }
+
+    }else if(command2 == 2){
+        system("cls");
+        show_ships_menu();
+        command4 = get_command();
+
+        if(command4 == 1){
+            system("cls");
+            get_random_ship(ships,water);
+
+        }else if(command4 == 2){
+            system("cls");
+            get_ship(ships, water);
+
+        }else{
+            system("cls");
+            printf("WRONG INPUT!\n");
+            players_menu(player,ships, water);
+        }
+
+    }else{
+        system("cls");
+        printf("WRONG INPUT!\n");
+        main_menu();
+    }
 }
 
 void show_player_menu(){
@@ -286,6 +414,10 @@ void show_player_menu(){
 void show_choose_user(){
     printf("1. Choose from available users\n"
            "2. New user\n");
+}
+
+void show_ships_menu(){
+    printf("1. Auto\n2. Manual\n");
 }
 
 int check_available_coor(int cte, int first, int end, int hor_or_vert, struct node **head2){ // hor =1= horizontal & vert =2= vertical
@@ -854,6 +986,17 @@ void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_le
     *head = link;
 }
 
+void insert_users( char name[], int points,int id, struct users **head){
+    struct users *link = (struct users*) malloc(sizeof(struct users));
+
+    strcpy(link->username, name);
+    link->points = points;
+    link->ID = id;
+
+    link->next = *head;
+    *head = link;
+}
+
 int destroyed_ship(int ship_num,int ship_length,  struct node** attack){
     int counter = 0;
     counter = counter_shipnum(attack, ship_num);
@@ -939,6 +1082,41 @@ void WriteListToFile(struct node* start, char filename[], char code[], char play
 
 }
 
+void WriteUsersToFile(struct users* start) {
+    FILE *pFile;
+    pFile = fopen("users101.bin", "wb");
+
+    if(pFile != NULL) {
+        struct users *currentCar = start;
+
+        struct users *holdNext = NULL;
+        struct users *holdPrevious = NULL;
+
+        while(currentCar != NULL) {
+            holdNext = currentCar->next;
+
+            currentCar->next = NULL;
+
+            fseek(pFile, 0, SEEK_END);
+            fwrite(currentCar, sizeof(struct users), 1, pFile);
+
+            currentCar->next = holdNext;
+
+            holdNext = NULL;
+            holdPrevious = NULL;
+
+            currentCar = currentCar->next;
+        }
+        fclose(pFile);
+        pFile = NULL;
+        printf("* saved *");
+
+    } else {
+        printf("FILE OPEN ERROR\n");
+    }
+
+}
+
 struct node *ReadNextFromFile(struct node *start, FILE *pFile) {
     size_t returnValue;
     if(start == NULL) {
@@ -990,9 +1168,69 @@ struct node *ReadListIn(struct node **start, char filename[], char code[], char 
 
 }
 
+struct users *ReadNextUser(struct users *start, FILE *pFile) {
+    size_t returnValue;
+    if(start == NULL) {
+        start = malloc(sizeof(struct users));
+        returnValue = fread(start, sizeof(struct users), 1, pFile);\
+        start->next = NULL;
+    } else {
+        struct users *indexCar = start;
+        struct users *newCar = malloc(sizeof(struct users));
+        while(indexCar->next != NULL) {
+            indexCar = indexCar->next;
+        }
+        returnValue = fread(newCar, sizeof(struct users), 1, pFile);
+        indexCar->next = newCar;
+        newCar->next = NULL;
+    }
+    return start;
+}
+
+struct users *ReadUsersIn(struct users **start) {
+
+    FILE *pFile;
+    pFile = fopen("users101.bin", "rb");
+    if(pFile != NULL) {
+
+        //CleanUp(*start);
+        *start = NULL;
+
+        fseek(pFile, 0, SEEK_END);
+        long fileSize = ftell(pFile);
+        rewind(pFile);
+
+        int numEntries = (int)(fileSize / (sizeof(struct users)));
+        printf("numEntries:%d\n",numEntries);
+
+        int loop ;
+        for(loop = 0; loop < numEntries; ++loop) {
+            fseek(pFile, (sizeof(struct users) * loop), SEEK_SET);
+            *start = ReadNextUser(*start, pFile);
+        }
+    }  else {
+        printf("FILE OPEN ERROR FOR READ\n");
+    }
+
+    return *start;
+
+}
+
 int length(struct  node **head) {
     int length = 0;
     struct node *current;
+    if(*head != NULL) {
+        for (current = *head; current != NULL; current = current->next) {
+            length++;
+        }
+    }
+
+    return length;
+}
+
+int length_users(struct  users **head) {
+    int length = 0;
+    struct users *current;
     if(*head != NULL) {
         for (current = *head; current != NULL; current = current->next) {
             length++;
@@ -1032,6 +1270,21 @@ void find_add(int key, struct node** head1,struct node** del, struct node** add)
         if(current->ship_num == key){
             insert_coordinates(current->row_coor,current->column_coor, current->ship_num, current->ship_length, add);
             delete_1var(key, del);
+        }
+        current = current->next;
+    }
+
+
+}
+
+// if one_or_two =1= player1 | =2= player2   key is ID
+void find_users(int key,int one_or_two ,struct users** head1, struct users** add) {
+
+    struct users* current = *head1;
+
+    while(current != NULL) {
+        if(current->ID == key){
+            insert_users(current->username, current->points, one_or_two, add);
         }
         current = current->next;
     }
@@ -1108,4 +1361,36 @@ struct node* delete_2var(int key,int data, struct node** head1) {
     }
 
     return current;
+}
+
+void sort(struct users **head) {
+
+    int i, j, k,tempData;
+    char tempname[20];
+    struct users *current;
+    struct users *next;
+
+    int size = length_users(head);
+    k = size ;
+
+    for ( i = 0 ; i < size - 1 ; i++, k-- ) {
+        current = *head;
+        next = (*head)->next;
+
+        for ( j = 1 ; j < k ; j++ ) {
+
+            if ( current->points > next->points ) {
+                tempData = current->points;
+                current->points = next->points;
+                next->points = tempData;
+
+                strcpy(tempname, current->username);
+                strcpy(current->username, next->username);
+                strcpy(next->username, tempname);
+            }
+
+            current = current->next;
+            next = next->next;
+        }
+    }
 }
