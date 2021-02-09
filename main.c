@@ -10,6 +10,8 @@
 #define column 10
 
 int id1, id2;
+int g_bot_or_human; // 1 == bot | 2 == human
+char username1[20] = "Player 1", username2[20] = "Player 2";
 
 struct users {
     char username[20];
@@ -25,8 +27,9 @@ struct node {
 
 struct users *start1;
 struct users *playing_users;
+struct users *saved_games;
 
-struct node *head1_p1 = NULL; // ship coordinates
+struct node *head1_p1 = NULL; //ship coordinates
 struct node *head2_p1 = NULL; // forbidden coordinates
 struct node *head_atkp1 = NULL; // coordinates that player1 attacked
 struct node *head_desp1 = NULL; // ship coordinates that player  1 destroyed
@@ -89,6 +92,7 @@ void insert_users();
 void sort();
 void reverse();
 void print_users();
+void print_games();
 int length_users();
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
@@ -103,66 +107,33 @@ bool search_linked();
 int main() {
     srand(time(0));
 
-    ReadUsersIn(&start1);
+    ReadUsersIn(&start1, 1);
     sort(&start1);
     reverse(&start1);
 
     system("cls");
+    printf(" BATTLE SHIP\n");
+
     main_menu();
-    print_users(&start1);
-    printf("\n%d %d\n", id1, id2);
-    WriteUsersToFile(start1);
-    /*
-    load_game();
-    print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-    print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-*/
 
-/*
-    main_menu();
-    print_users(&playing_users);
-    WriteUsersToFile(start1);
-*/
-    /*
-    sort(&start1);
-    print_users(&start1);
-
-
-    create_newuser();
-    create_newuser();
-    create_newuser();
-
-    print_users(&start1);
-    WriteUsersToFile(start1);
-*/
-    //get_random_ship(&head1_p1, &head2_p1);
-    //load_game();
-    //two_player_game();
-    //play_with_bot();
-    //WriteListToFile(&head1_p1);
-    //ReadListIn(&head1_p1);
-    //print_map(10, &head1_p1);
-    //printList(&head1_p1);
-    //save_game();
-    //cleanup_all();
-    //main_menu();
-    //cleanup_list(&head2_p1);
-    //cleanup_list(&head2_p2);
+    WriteUsersToFile(start1, 1);
 }
 
 // bot == 1 human ==2
-void save_game(int bot_or_human){
+void save_game(){
 
     char user[20], temp[20];
     printf("enter your file name [maximum of 10 character]: ");
     scanf("%s", user);
     printf("\n");
+    insert_users(user, 0, 0, &saved_games);
+    WriteUsersToFile(saved_games, 2);
 
     strcpy(temp, user);
     strcat(user,"data.txt");
     FILE *fp = fopen(user, "w");
     fseek(fp,0, SEEK_SET);
-    fprintf(fp,"%d,%d,%d", bot_or_human, id1, id2);
+    fprintf(fp,"%d,%d,%d", g_bot_or_human, id1, id2);
     fclose(fp);
 
     strcpy(user, temp);
@@ -187,15 +158,18 @@ void save_game(int bot_or_human){
     strcpy(user, temp);
     WriteListToFile(water_p2, user, "pwat", "p2");
     strcpy(user, temp);
-    system("cls");
 
-    WriteUsersToFile(&start1);
+    WriteUsersToFile(start1, 1);
 
 }
 
 int load_game(){
     char user[20], temp[20];
-    printf("enter your file name [maximum of 10 character]: ");
+    ReadUsersIn(&saved_games, 2);
+    print_games(&saved_games);
+    printf("\n");
+
+    printf("enter your file name you wanna load: ");
     scanf("%s", user);
     printf("\n");
 
@@ -207,7 +181,10 @@ int load_game(){
     fgets(parsedLine, 100, fp);
     int bot_or_human = atoi(strtok(parsedLine, ","));
     id1 = atoi(strtok(NULL, ","));
+    find_users(id1, 1,  0, &start1, &playing_users);
     id2 = atoi(strtok(NULL, ","));
+    find_users(id2, 2,  0, &start1, &playing_users);
+
 
     fclose(fp);
 
@@ -245,7 +222,7 @@ void two_player_game(){
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
 
-        printf("\nPlayer 1 Turn:\n1. Attack  2. Save  3. Exit\n");
+        printf("\n%s's Turn:\n1. Attack  2. Save  3. Exit\n", username1);
         what_player_choose(1);
 
         /*
@@ -261,7 +238,7 @@ void two_player_game(){
         }
 
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 2 Turn:\n1. Attack  2. Save Game  3. Exit\n");
+        printf("\n%s's Turn:\n1. Attack  2. Save Game  3. Exit\n", username2);
         what_player_choose(2);
         /*
         attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
@@ -274,12 +251,12 @@ void two_player_game(){
 
     if(head1_p1 == NULL){
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 2 WON!\nCongratulations!\n");
+        printf("\n%s WON!\nCongratulations!\n", username1);
     }
 
     if(head1_p2 == NULL){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-        printf("\nPlayer 1 WON!\nCongratulations!\n");
+        printf("\n%s WON!\nCongratulations!\n", username2);
     }
 
 }
@@ -292,7 +269,7 @@ void play_with_bot(){
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-        printf("\nPlayer 1 Turn:\n");
+        printf("\n%s's Turn:\n1. Attack  2. Save  3. Exit\n", username1);
         what_player_choose(1);
         /*
         attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
@@ -323,12 +300,12 @@ void play_with_bot(){
 
     if(head1_p1 == NULL){
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 2 WON!\nCongratulations!\n");
+        printf("\nBOT WON!\nOops! :(\n");
     }
 
     if(head1_p2 == NULL){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-        printf("\nPlayer 1 WON!\nCongratulations!\n");
+        printf("\n%s WON!\nCongratulations!\n", username1);
     }
 
 }
@@ -376,7 +353,8 @@ void what_player_choose(int one_or_two){
     }
 
     else if(command == 2){
-        save_game(1);
+        save_game();
+        printf("\n%s Turn:\n1. Attack  2. Save  3. Exit\n", username1);
         what_player_choose(one_or_two);
     }
 
@@ -390,7 +368,7 @@ void what_player_choose(int one_or_two){
 }
 
 void main_menu(){
-    int command1;
+    int command1, command2;
     show_main_menu();
     command1 = get_command();
 
@@ -401,17 +379,20 @@ void main_menu(){
         system("cls");
         players_menu("Player 2",2,&head1_p2, &head2_p2);
 
+        g_bot_or_human = 2;
         two_player_game();
 
     }else if(command1 == 2){
         system("cls");
-        put_ships_menu("Player", 1, &head1_p1, &head1_p2);
+        players_menu("Player",1,&head1_p1, &head2_p1);
+        g_bot_or_human = 1;
+
         play_with_bot();
 
     }else if (command1 == 3){
         system("cls");
         int bot_or_human = load_game();
-        if(bot_or_human == 2) {
+        if(bot_or_human == 1) {
             play_with_bot();
         }else{
             two_player_game();
@@ -423,6 +404,10 @@ void main_menu(){
         sort(&start1);
         reverse(&start1);
         print_users(&start1);
+
+        countdown(10);
+        system("cls");
+        main_menu();
 
     }else if (command1 == 5){
         system("cls");
@@ -466,7 +451,7 @@ void create_newuser(int one_or_two) {
     }
     insert_users(username, 0, id, &start1);
     find_users(id, one_or_two,0, &start1);
-    WriteUsersToFile(start1);
+    WriteUsersToFile(start1, 1);
 
 }
 
@@ -477,6 +462,18 @@ void print_users(struct users **head) {
     printf(" Row   Username             Points   ID\n\n");
     while (ptr != NULL) {
         printf("%3d.   %-20s %-4d     %-3d\n", i, ptr->username, ptr->points, ptr->ID);
+        ptr = ptr->next;
+        i++;
+    }
+}
+
+void print_games(struct users **head) {
+    struct users *ptr = *head;
+    printf("\n\n");
+    int i = 1;
+    printf(" Row   Name\n\n");
+    while (ptr != NULL) {
+        printf("%3d.   %-20s\n", i, ptr->username);
         ptr = ptr->next;
         i++;
     }
@@ -602,7 +599,7 @@ int check_available_coor(int cte, int first, int end, int hor_or_vert, struct no
 
 void countdown(int duration){
     for(int i = duration; i>0; i--) {
-        printf("This map will be hidden after %d second(s)...\n", i);
+        printf("This will be hidden after %d second(s)...\n", i);
         sleep(1);
     }
 }
@@ -1253,9 +1250,14 @@ void WriteListToFile(struct node* start, char filename[], char code[], char play
 
 }
 
-void WriteUsersToFile(struct users* start) {
+// 1 for user & 2 for game
+void WriteUsersToFile(struct users* start, int user_or_game) {
     FILE *pFile;
-    pFile = fopen("users101.bin", "wb");
+    if(user_or_game == 1) {
+        pFile = fopen("users101.bin", "wb");
+    }else if(user_or_game == 2){
+        pFile = fopen("savedgames101.bin", "wb");
+    }
 
     if(pFile != NULL) {
         struct users *currentCar = start;
@@ -1357,10 +1359,16 @@ struct users *ReadNextUser(struct users *start, FILE *pFile) {
     return start;
 }
 
-struct users *ReadUsersIn(struct users **start) {
+// 1 for user & 2 for game
+struct users *ReadUsersIn(struct users **start, int user_or_game) {
 
     FILE *pFile;
-    pFile = fopen("users101.bin", "rb");
+    if(user_or_game == 1) {
+        pFile = fopen("users101.bin", "rb");
+    }else if(user_or_game == 2){
+        pFile = fopen("savedgames101.bin", "rb");
+
+    }
     if(pFile != NULL) {
 
         //CleanUp(*start);
@@ -1458,9 +1466,11 @@ void find_users(int key,int one_or_two ,int add_point, struct users** head1, str
             current->points = current->points + add_point;
             if(one_or_two == 1){
                 id1 = current->ID;
+                strcpy(username1, current->username);
             }
             else if(one_or_two == 2){
                 id2 = current->ID;
+                strcpy(username2, current->username);
             }
         }
         current = current->next;
