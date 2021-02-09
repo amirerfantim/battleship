@@ -79,6 +79,7 @@ void cleanup_list();
 void cleanup_all();
 void two_player_game();
 void play_with_bot();
+void what_player_choose();
 void save_game();
 void load_game();
 void insert_users();
@@ -98,9 +99,14 @@ bool search_linked();
 int main() {
     srand(time(0));
     system("cls");
-    main_menu();
-/*
     ReadUsersIn(&start1);
+    //main_menu();
+    //load_game();
+    print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+    print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+
+
+/*
     main_menu();
     print_users(&playing_users);
     WriteUsersToFile(start1);
@@ -194,30 +200,38 @@ void load_game(){
 }
 
 void two_player_game(){
-    get_ship(&head1_p1, &head2_p1);
-    get_ship(&head1_p2, &head2_p2);
+    //get_ship(&head1_p1, &head2_p1);
+    //get_ship(&head1_p2, &head2_p2);
     cleanup_all();
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-        printf("\nPlayer 1 Turn:\n");
+
+        printf("\nPlayer 1 Turn:\n1. Attack\t2. Save\t3. Exit\n");
+        what_player_choose(1);
+
+        /*
         attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
         system("cls");
+         */
 
         if(head1_p2 == NULL){
             break;
         }
 
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\nPlayer 2 Turn:\n");
+        printf("\nPlayer 1 Turn:\n1. Attack\t2. Save\t3. Exit");
+        what_player_choose(2);
+        /*
         attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
         system("cls");
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         countdown(2);
         system("cls");
+         */
     }
 
     if(head1_p1 == NULL){
@@ -270,6 +284,38 @@ void play_with_bot(){
     }
 
 }
+// one or two means player1  or player2
+void what_player_choose(int one_or_two){
+    int command;
+    command = get_command();
+    if(command == 1 && one_or_two == 1){
+        attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
+        system("cls");
+        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        countdown(2);
+        system("cls");
+    }
+
+    else if(command == 1 && one_or_two == 1){
+        attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
+        system("cls");
+        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+        countdown(2);
+        system("cls");
+    }
+
+    else if(command == 2){
+        save_game();
+    }
+
+    else if(command == 3){
+        printf("\n\n    GOOD BYE :)\n");
+        exit(0);
+    }else{
+        printf("\nWrong input! TryAgian...\n");
+        what_player_choose(one_or_two);
+    }
+}
 
 void main_menu(){
     int command1;
@@ -279,9 +325,9 @@ void main_menu(){
     if(command1 == 1){
         system("cls");
         players_menu("player 1",&head1_p1, &head2_p1);
-
         system("cls");
         players_menu("player 2",&head1_p2, &head2_p2);
+        two_player_game();
     }else if(command1 == 2){
         system("cls");
         play_with_bot();
@@ -343,67 +389,60 @@ void print_users(struct users **head) {
 void players_menu(char player[],struct node** ships,struct node **water){
     printf("\n%s:\n", player);
     int command2, command3, command4;
-    show_player_menu();
-    command2 = get_command();
-    if(command2 == 1){
+
+    system("cls");
+
+    show_choose_user();
+    command3 = get_command();
+
+    if(command3 == 1){
         system("cls");
-        show_choose_user();
-        command3 = get_command();
+        int user_row, id, users_leng;
 
-        if(command3 == 1){
+        print_users(&start1);
+        users_leng = length_users(&start1);
+
+        printf("\nChoose an user (enter row number  to choose): ");
+        scanf("%d", &user_row);
+        if(user_row > users_leng){
             system("cls");
-            int user_row, id, users_leng;
-
-            print_users(&start1);
-            users_leng = length_users(&start1);
-
-            printf("\nChoose an user (enter row number  to choose): ");
-            scanf("%d", &user_row);
-            if(user_row > users_leng){
-                system("cls");
-                printf("WRONG INPUT!\n");
-                players_menu(player,ships, water);
-            }
-            else{
-                system("cls");
-                id = users_leng - (user_row - 1);
-                find_users(id, 1, &start1, &playing_users);
-            }
-        }
-        else if(command3 == 2){
-            system("cls");
-            create_newuser();
+            printf("WRONG INPUT!\n");
+            players_menu(player,ships, water);
         }
         else{
             system("cls");
-            printf("WRONG INPUT!\n");
-            players_menu(player,ships, water);
+            id = users_leng - (user_row - 1);
+            find_users(id, 1, &start1, &playing_users);
         }
-
-    }else if(command2 == 2){
+    }
+    else if(command3 == 2){
         system("cls");
-        show_ships_menu();
-        command4 = get_command();
-
-        if(command4 == 1){
-            system("cls");
-            get_random_ship(ships,water);
-
-        }else if(command4 == 2){
-            system("cls");
-            get_ship(ships, water);
-
-        }else{
-            system("cls");
-            printf("WRONG INPUT!\n");
-            players_menu(player,ships, water);
-        }
-
-    }else{
+        create_newuser();
+    }
+    else{
         system("cls");
         printf("WRONG INPUT!\n");
         main_menu();
     }
+
+    system("cls");
+    show_ships_menu();
+    command4 = get_command();
+
+    if(command4 == 1){
+        system("cls");
+        get_random_ship(ships,water);
+
+    }else if(command4 == 2){
+        system("cls");
+        get_ship(ships, water);
+
+    }else {
+        system("cls");
+        printf("WRONG INPUT!\n");
+        main_menu();
+    }
+
 }
 
 void show_player_menu(){
@@ -417,7 +456,7 @@ void show_choose_user(){
 }
 
 void show_ships_menu(){
-    printf("1. Auto\n2. Manual\n");
+    printf("Put ships:\n1. Auto\n2. Manual\n");
 }
 
 int check_available_coor(int cte, int first, int end, int hor_or_vert, struct node **head2){ // hor =1= horizontal & vert =2= vertical
