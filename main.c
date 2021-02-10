@@ -41,7 +41,7 @@ struct node *head_atkp2 = NULL; // coordinates that player2 attacked
 struct node *head_desp2 = NULL; // ship coordinates that player 2 destroyed
 struct node *water_p2 = NULL; // water around destroyed ship
 
-
+/*
 void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
@@ -51,6 +51,7 @@ void printList(struct node **head) {
     }
     printf(" ]");
 }
+*/
 
 void main_menu();
 void show_main_menu();
@@ -106,6 +107,7 @@ bool search_linked();
 
 int main() {
     srand(time(0));
+    system("mkdir data\\users");
 
     ReadUsersIn(&start1, 1);
     sort(&start1);
@@ -117,54 +119,84 @@ int main() {
     main_menu();
 
     WriteUsersToFile(start1, 1);
+
 }
 
 // bot == 1 human ==2
 void save_game(){
 
-    char user[20], temp[20];
+    char user[20], temp[20], file_address[50], address_temp[50], folder_name[50];
     printf("enter your file name [maximum of 10 character]: ");
     scanf("%s", user);
     printf("\n");
     insert_users(user, 0, 0, &saved_games);
     WriteUsersToFile(saved_games, 2);
 
-    strcpy(temp, user);
-    strcat(user,"data.txt");
-    FILE *fp = fopen(user, "w");
+    strcpy(folder_name, "mkdir data\\users\\");
+    strcat(folder_name, user);
+    system(folder_name);
+
+    strcpy(file_address,  "data\\users\\");
+    strcat(file_address, user);
+    strcat(file_address,"\\");
+    strcpy(address_temp, file_address);
+
+    strcat(file_address, "data.txt");
+
+    FILE *fp = fopen(file_address, "w");
     fseek(fp,0, SEEK_SET);
     fprintf(fp,"%d,%d,%d", g_bot_or_human, id1, id2);
     fclose(fp);
 
-    strcpy(user, temp);
-    WriteListToFile(head1_p1, user, "ship", "p1");
-    strcpy(user, temp);
-    WriteListToFile(head_atkp1, user, "atk", "p1");
-    strcpy(user, temp);
-    WriteListToFile(head_desp1, user, "des", "p1");
-    strcpy(user, temp);
-    WriteListToFile(head2_p1, user, "awat", "p1");
-    strcpy(user, temp);
-    WriteListToFile(water_p1, user, "pwat", "p1");
-    strcpy(user, temp);
 
-    WriteListToFile(head1_p2, user, "ship", "p2");
-    strcpy(user, temp);
-    WriteListToFile(head_atkp2, user, "atk", "p2");
-    strcpy(user, temp);
-    WriteListToFile(head_desp2, user, "des", "p2");
-    strcpy(user, temp);
-    WriteListToFile(head2_p2, user, "awat", "p2");
-    strcpy(user, temp);
-    WriteListToFile(water_p2, user, "pwat", "p2");
-    strcpy(user, temp);
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head1_p1, file_address, "ship", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head_atkp1, file_address, "atk", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head_desp1, file_address, "des", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head2_p1, file_address, "awat", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(water_p1, file_address, "pwat", "p1");
+
+
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head1_p2, file_address, "ship", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head_atkp2, file_address, "atk", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head_desp2, file_address, "des", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(head2_p2, file_address, "awat", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    WriteListToFile(water_p2, file_address, "pwat", "p2");
 
     WriteUsersToFile(start1, 1);
 
 }
 
 int load_game(){
-    char user[20], temp[20];
+    char user[20], temp[20], file_address[50], address_temp[50];
     ReadUsersIn(&saved_games, 2);
     print_games(&saved_games);
     printf("\n");
@@ -173,10 +205,16 @@ int load_game(){
     scanf("%s", user);
     printf("\n");
 
-    strcpy(temp, user);
-    strcat(user,"data.txt");
-    FILE *fp = fopen(user, "r");
+    strcpy(file_address,  "data\\users\\");
+    strcat(file_address, user);
+    strcat(file_address,"\\");
+    strcpy(address_temp, file_address);
+
+    strcat(file_address, "data.txt");
+
+    FILE *fp = fopen(file_address, "r");
     fseek(fp,0, SEEK_SET);
+
     char parsedLine[102];
     fgets(parsedLine, 100, fp);
     int bot_or_human = atoi(strtok(parsedLine, ","));
@@ -188,28 +226,47 @@ int load_game(){
 
     fclose(fp);
 
-    strcpy(user, temp);
-    ReadListIn(&head1_p1, user, "ship", "p1");
-    strcpy(user, temp);
-    ReadListIn(&head_atkp1, user, "atk", "p1");
-    strcpy(user, temp);
-    ReadListIn(&head_desp1, user, "des", "p1");
-    strcpy(user, temp);
-    ReadListIn(&head2_p1, user, "awat", "p1");
-    strcpy(user, temp);
-    ReadListIn(&water_p1, user, "pwat", "p1");
-    strcpy(user, temp);
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head1_p1, file_address, "ship", "p1");
 
-    ReadListIn(&head1_p2, user, "ship", "p2");
-    strcpy(user, temp);
-    ReadListIn(&head_atkp2, user, "atk", "p2");
-    strcpy(user, temp);
-    ReadListIn(&head_desp2, user, "des", "p2");
-    strcpy(user, temp);
-    ReadListIn(&head2_p2, user, "awat", "p2");
-    strcpy(user, temp);
-    ReadListIn(&water_p2, user, "pwat", "p2");
-    strcpy(user, temp);
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head_atkp1, file_address, "atk", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head_desp1, file_address, "des", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head2_p1, file_address, "awat", "p1");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&water_p1, file_address, "pwat", "p1");
+
+
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head1_p2, file_address, "ship", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head_atkp2, file_address, "atk", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head_desp2, file_address, "des", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&head2_p2, file_address, "awat", "p2");
+
+    strcpy(file_address, address_temp);
+    strcat(file_address, user);
+    ReadListIn(&water_p2, file_address, "pwat", "p2");
 
     return bot_or_human;
 }
@@ -392,9 +449,15 @@ void main_menu(){
     }else if (command1 == 3){
         system("cls");
         int bot_or_human = load_game();
+
+        find_users(id1, 1, 0, &start1, &playing_users);
+        find_users(id2, 2, 0, &start1, &playing_users);
+
         if(bot_or_human == 1) {
+            g_bot_or_human = 1;
             play_with_bot();
         }else{
+            g_bot_or_human = 2;
             two_player_game();
         }
 
@@ -405,7 +468,7 @@ void main_menu(){
         reverse(&start1);
         print_users(&start1);
 
-        countdown(10);
+        countdown(5);
         system("cls");
         main_menu();
 
@@ -642,6 +705,7 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates_p1(1, 9);
     get_coordinates_p1(1, 10);
 */
+    WriteListToFile()
 }
 
 int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row num & col =2= return column num
@@ -1254,9 +1318,9 @@ void WriteListToFile(struct node* start, char filename[], char code[], char play
 void WriteUsersToFile(struct users* start, int user_or_game) {
     FILE *pFile;
     if(user_or_game == 1) {
-        pFile = fopen("users101.bin", "wb");
+        pFile = fopen("data\\users101.bin", "wb");
     }else if(user_or_game == 2){
-        pFile = fopen("savedgames101.bin", "wb");
+        pFile = fopen("data\\savedgames101.bin", "wb");
     }
 
     if(pFile != NULL) {
@@ -1364,9 +1428,9 @@ struct users *ReadUsersIn(struct users **start, int user_or_game) {
 
     FILE *pFile;
     if(user_or_game == 1) {
-        pFile = fopen("users101.bin", "rb");
+        pFile = fopen("data\\users101.bin", "rb");
     }else if(user_or_game == 2){
-        pFile = fopen("savedgames101.bin", "rb");
+        pFile = fopen("data\\savedgames101.bin", "rb");
 
     }
     if(pFile != NULL) {
