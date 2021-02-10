@@ -44,16 +44,18 @@ struct node *water_p2 = NULL; // water around destroyed ship
 // for play-back player 1
 struct node *h_ships_p1 = NULL; // ship coordinates
 struct node *ha_water_p1 = NULL; // forbidden coordinates
-struct node *h_atk_p1 = NULL; // coordinates that player2 attacked
+struct node *h_atk_p1 = NULL; // to save coordinates that player2 attacked
 struct node *h_des_p1 = NULL; // ship coordinates that player 2 destroyed
 struct node *h_water_p1 = NULL; // water around destroyed ship
+struct node *show_atk_p1 = NULL; // to show attacked coor's one-by-ne
 
 // for play-back player 2
 struct node *h_ships_p2 = NULL; // ship coordinates
 struct node *ha_water_p2 = NULL; // forbidden coordinates
-struct node *h_atk_p2 = NULL; // coordinates that player2 attacked
+struct node *h_atk_p2 = NULL; // to save coordinates that player2 attacked
 struct node *h_des_p2 = NULL; // ship coordinates that player 2 destroyed
 struct node *h_water_p2 = NULL; // water around destroyed ship
+struct node *show_atk_p2 = NULL; // to show attacked coor's one-by-ne
 
 
 void printList(struct node **head) {
@@ -309,7 +311,6 @@ void two_player_game(){
     list_duplicator(&head2_p2, &ha_water_p2);
 
 
-
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
 
@@ -340,17 +341,18 @@ void two_player_game(){
          */
     }
 
-    if(head1_p2 == NULL){
-        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\n%s WON!\nCongratulations!\n", username1);
-    }
-
     if(head1_p1 == NULL){
-        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         printf("\n%s WON!\nCongratulations!\n", username2);
     }
+
+    if(head1_p2 == NULL){
+        print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+        printf("\n%s WON!\nCongratulations!\n", username1);
+    }
     WriteUsersToFile(start1, 1);
-    sleep(4);
+
+    sleep(5);
     system("cls");
     printf("\nNOW THE PLAY BACK!\n");
     playback();
@@ -389,10 +391,10 @@ void play_with_bot(){
 
         //print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
-                                        , &water_p1, &head2_p1, 1);
+                                        , &water_p1, &head2_p1, 1, &h_atk_p2);
         while(hit_or_not == 1){
             hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
-                    , &water_p1, &head2_p1, 1);
+                    , &water_p1, &head2_p1, 1, &h_atk_p2);
             system("cls");
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         }
@@ -414,6 +416,10 @@ void play_with_bot(){
 
     WriteUsersToFile(start1);
 
+    sleep(5);
+    system("cls");
+    printf("\nNOW THE PLAY BACK!\n");
+    playback();
 }
 
 // one or two means player1  or player2
@@ -423,7 +429,7 @@ void what_player_choose(int one_or_two){
     command = get_command();
     if(command == 1 && one_or_two == 1){
         hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                       &water_p2, &head2_p2, 0);
+                                       &water_p2, &head2_p2, 0, &h_atk_p1);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
@@ -433,7 +439,7 @@ void what_player_choose(int one_or_two){
             printf("\nUse Your Bonus:\n");
             print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                           &water_p2, &head2_p2, 0);
+                                           &water_p2, &head2_p2, 0, &h_atk_p1);
            system("cls");
            print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             countdown(2);
@@ -443,7 +449,7 @@ void what_player_choose(int one_or_two){
 
     else if(command == 1 && one_or_two == 2){
         hit_or_not = attack_coordinates(one_or_two, &head_atkp2, &head1_p1,&head_desp1,
-                                        &water_p1, &head2_p1, 0);
+                                        &water_p1, &head2_p1, 0, &h_atk_p2);
         system("cls");
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         countdown(2);
@@ -452,7 +458,7 @@ void what_player_choose(int one_or_two){
             printf("\nUse Your Bonus:\n");
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
             hit_or_not = attack_coordinates(one_or_two, &head_atkp2, &head1_p1,&head_desp1,
-                                            &water_p1, &head2_p1, 0);
+                                            &water_p1, &head2_p1, 0, &h_atk_p2);
             system("cls");
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
             countdown(2);
@@ -1218,7 +1224,7 @@ void get_random_ship(struct node **head1, struct node **head2){
 // if head==p1 then ships==p2
 // if rand_or_not == 1 ->random if == 0 ->manual
 int attack_coordinates(int one_or_two, struct node **attack, struct node **ships2, struct node **destroy,
-        struct node** water, struct node **all_water, int rand_or_not) {
+        struct node** water, struct node **all_water, int rand_or_not, struct node ** playback_atk) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column;
 
@@ -1246,17 +1252,18 @@ int attack_coordinates(int one_or_two, struct node **attack, struct node **ships
     if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
         if(search_linked(attack, inner_row, inner_column) == false) {
             insert_coordinates(inner_row, inner_column, ship_num, ship_length, attack);
+            insert_coordinates(inner_row, inner_column, ship_num, ship_length, playback_atk);
         }
         else{
             printf("\nYou've already hit this coordinate...\nTry Again\n\n");
-            attack_coordinates(one_or_two,attack, ships2, destroy, water, all_water, rand_or_not);
+            attack_coordinates(one_or_two,attack, ships2, destroy, water, all_water, rand_or_not, playback_atk);
         }
     }
 
 
     else{
         printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
-        attack_coordinates(one_or_two, attack, ships2, destroy, water, all_water, rand_or_not);
+        attack_coordinates(one_or_two, attack, ships2, destroy, water, all_water, rand_or_not, playback_atk);
     }
 
     int check_destroyed = 0;
@@ -1291,7 +1298,7 @@ void rocket(int one_or_two){
         tester = valid_rocket_coor(rocket_num);
 
         if(tester == 0){
-            what_player_choose(one_or_two);
+            rocket(one_or_two);
         }
         else if(one_or_two == 1){
             for(loop = 1; loop < 11; loop++){
@@ -1317,7 +1324,7 @@ void rocket(int one_or_two){
         tester = valid_rocket_coor(rocket_num);
 
         if(tester == 0){
-            what_player_choose(one_or_two);
+            rocket(one_or_two);
         }
         else if(one_or_two == 1){
             for(loop = 1; loop < 11; loop++){
@@ -1915,11 +1922,11 @@ void list_duplicator(struct node ** main, struct node **add) {
 
 // play-back functions
 
-int playback_attack(int pos, int one_or_two, struct node **attack,struct node **playback_atk,
+int playback_attack(int pos, int one_or_two,struct node ** show_atk, struct node **playback_atk,
         struct node **ships2, struct node **destroy,  struct node** water, struct node **all_water) {
     int inner_row, inner_column;
 
-    struct node *current = find_by_pos(pos,  attack);
+    struct node *current = find_by_pos(pos,  playback_atk);
     inner_row = current->row_coor;
     inner_column = current->column_coor;
 
@@ -1932,15 +1939,15 @@ int playback_attack(int pos, int one_or_two, struct node **attack,struct node **
         ship_length = search_result->ship_length;
     }
 
-    insert_coordinates(inner_row, inner_column,  ship_num, ship_length, playback_atk);
+    insert_coordinates(inner_row, inner_column,  ship_num, ship_length, show_atk);
 
 
     int check_destroyed = 0;
     if(hit_or_not != 0){
-        check_destroyed = destroyed_ship(ship_num, ship_length, playback_atk);
+        check_destroyed = destroyed_ship(ship_num, ship_length, show_atk);
     }
     if(check_destroyed == 1){
-        find_add(ship_num, playback_atk, ships2, destroy);
+        find_add(ship_num, show_atk, ships2, destroy);
         find_add(ship_num, all_water, all_water, water );
     }
     if(hit_or_not != 0 && one_or_two == 1){
@@ -1959,18 +1966,22 @@ int playback_attack(int pos, int one_or_two, struct node **attack,struct node **
 
 void playback(){
     int loop1 = 1,  loop2 = 1;
+    reverse_node(&h_atk_p2);
+    reverse_node(&h_atk_p1);
 
     while(h_ships_p1 != NULL && h_ships_p2 != NULL) {
+
         int hit_or_not  = 1;
-        print_atk_map(&h_atk_p1, &ha_water_p2, &h_des_p2, &h_water_p2);
+        printf("\n%s Turn\n", username1);
+        print_atk_map(&show_atk_p1, &h_ships_p2, &h_des_p2, &h_water_p2);
         sleep(1);
         system("cls");
 
         while(hit_or_not == 1) {
-            hit_or_not = playback_attack(loop1,1, &head_atkp1,&h_atk_p1,  &h_ships_p2, &h_des_p2,
+            hit_or_not = playback_attack(loop1,1,&show_atk_p1, &h_atk_p1,  &h_ships_p2, &h_des_p2,
                                             &h_water_p2, &ha_water_p2);
-
-            print_atk_map(&h_atk_p1, &ha_water_p2, &h_des_p2, &h_water_p2);
+            printf("\n%s Turn\n", username1);
+            print_atk_map(&show_atk_p1, &h_ships_p2, &h_des_p2, &h_water_p2);
             sleep(1);
             system("cls");
             loop1++;
@@ -1980,16 +1991,19 @@ void playback(){
             break;
         }
         hit_or_not = 1;
-        print_atk_map(&h_atk_p2, &h_ships_p1, &h_des_p1, &ha_water_p1);
+
+        printf("\n%s Turn\n", username2);
+        print_atk_map(&show_atk_p2, &h_ships_p1, &h_des_p1, &h_water_p1);
         sleep(1);
         system("cls");
 
         while(hit_or_not == 1) {
-            hit_or_not = playback_attack(loop2,2, &head_atkp2 ,&h_atk_p2,  &h_ships_p1, &h_des_p1,
+            hit_or_not = playback_attack(loop2,2,&show_atk_p2, &h_atk_p2,  &h_ships_p1, &h_des_p1,
                                          &h_water_p1, &ha_water_p1);
             loop2++;
 
-            print_atk_map(&h_atk_p2, &h_ships_p1, &h_des_p1, &ha_water_p1);
+            printf("\n%s Turn\n", username2);
+            print_atk_map(&show_atk_p2, &h_ships_p1, &h_des_p1, &h_water_p1);
             sleep(1);
             system("cls");
         }
@@ -2009,6 +2023,7 @@ void playback(){
         sleep(3);
         system("cls");
     }
+
 
 }
 
