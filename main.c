@@ -68,6 +68,10 @@ void print_atk_map();
 void countdown();
 void get_coordinates();
 int attack_coordinates();
+void rocket();
+int valid_rocket_coor();
+int rocket_coordinates();
+int rocket_users();
 void insert_coordinates();
 void random_coordinates();
 void get_random_ship();
@@ -122,7 +126,7 @@ int main() {
 
 }
 
-// bot == 1 human ==2
+// bot == 1 || human =+2
 void save_game(){
 
     char user[20], temp[20], file_address[50], address_temp[50], folder_name[50];
@@ -279,7 +283,7 @@ void two_player_game(){
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
 
-        printf("\n%s's Turn:\n1. Attack  2. Save  3. Exit\n", username1);
+        printf("\n%s's Turn:\n1. Attack  2. Save 3. Rocket  4. Exit\n", username1);
         what_player_choose(1);
 
         /*
@@ -295,7 +299,7 @@ void two_player_game(){
         }
 
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        printf("\n%s's Turn:\n1. Attack  2. Save Game  3. Exit\n", username2);
+        printf("\n%s's Turn:\n1. Attack  2. Save Game  3. Rocket  4. Exit\n", username2);
         what_player_choose(2);
         /*
         attack_coordinates(&head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 0);
@@ -306,12 +310,12 @@ void two_player_game(){
          */
     }
 
-    if(head1_p1 == NULL){
+    if(head1_p2 == NULL){
         print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         printf("\n%s WON!\nCongratulations!\n", username1);
     }
 
-    if(head1_p2 == NULL){
+    if(head1_p1 == NULL){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\n%s WON!\nCongratulations!\n", username2);
     }
@@ -326,7 +330,7 @@ void play_with_bot(){
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
-        printf("\n%s's Turn:\n1. Attack  2. Save  3. Exit\n", username1);
+        printf("\n%s's Turn:\n1. Attack  2. Save  3. Rocket 4. Exit\n", username1);
         what_player_choose(1);
         /*
         attack_coordinates(&head_atkp1, &head1_p2, &head_desp2, &water_p2, &head2_p2, 0);
@@ -366,9 +370,11 @@ void play_with_bot(){
     }
 
 }
+
 // one or two means player1  or player2
 void what_player_choose(int one_or_two){
     int command, hit_or_not;
+
     command = get_command();
     if(command == 1 && one_or_two == 1){
         hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
@@ -411,11 +417,35 @@ void what_player_choose(int one_or_two){
 
     else if(command == 2){
         save_game();
-        printf("\n%s Turn:\n1. Attack  2. Save  3. Exit\n", username1);
+        printf("\n%s Turn:\n1. Attack  2. Save  3.Rocket  4. Exit\n", username1);
         what_player_choose(one_or_two);
     }
-
     else if(command == 3){
+            int enough_points;
+            if(one_or_two == 1){
+                enough_points = rocket_users(id1, 1, &start1);
+                if(enough_points == 1){
+                    rocket(one_or_two);
+                }else{
+                    printf("\nNot enough points!\n");
+                    sleep(1);
+                    printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
+                    what_player_choose(1);
+                }
+            }else if(one_or_two == 2){
+                enough_points = rocket_users(id2, 2, &start1);
+                if(enough_points == 1){
+                    rocket(one_or_two);
+                }else{
+                    printf("\nNot enough points!\n");
+                    sleep(1);
+                    printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
+                    what_player_choose(2);
+                }
+            }
+    }
+
+    else if(command == 4){
         printf("\n\n    GOOD BYE :)\n");
         exit(0);
     }else{
@@ -705,7 +735,6 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates_p1(1, 9);
     get_coordinates_p1(1, 10);
 */
-    WriteListToFile()
 }
 
 int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row num & col =2= return column num
@@ -1206,6 +1235,117 @@ int attack_coordinates(int one_or_two, struct node **attack, struct node **ships
     return hit_or_not;
 }
 
+void rocket(int one_or_two){
+    int command,  rocket_num, loop, tester;
+    printf("\nUse Your Rocket!\n1. Vertical  2. Horizontal\n");
+    command = get_command();
+    if(command == 1){
+        printf("enter the column number you wanna hit: ");
+        scanf("%d", &rocket_num);
+        tester = valid_rocket_coor(rocket_num);
+
+        if(tester == 0){
+            what_player_choose(one_or_two);
+        }
+        else if(one_or_two == 1){
+            for(loop = 1; loop < 11; loop++){
+                rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                                   &water_p2, &head2_p2);
+            }
+            print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+            countdown(2);
+            system("cls");
+
+        }else if (one_or_two == 2){
+            for(loop = 1; loop < 11; loop++) {
+                rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
+                                   &water_p1, &head2_p1);
+            }
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+        }
+    }else if(command == 2){
+        printf("enter the row number you wanna hit: ");
+        scanf("%d", &rocket_num);
+        tester = valid_rocket_coor(rocket_num);
+
+        if(tester == 0){
+            what_player_choose(one_or_two);
+        }
+        else if(one_or_two == 1){
+            for(loop = 1; loop < 11; loop++){
+                rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                                   &water_p2, &head2_p2);
+            }
+            print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+            countdown(2);
+            system("cls");
+
+        }else if (one_or_two == 2){
+            for(loop = 1; loop < 11; loop++) {
+                rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
+                                   &water_p1, &head2_p1);
+            }
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+        }
+    }else{
+        printf("\n1. Attack  2. Save 3. Rocket  4. Exit\n");
+        what_player_choose(one_or_two);
+    }
+
+}
+
+int valid_rocket_coor(int rocket_num){
+    if(rocket_num < 11 && rocket_num > 0){
+        return 1;
+    }
+    return 0;
+};
+
+int rocket_coordinates(int inner_row, int inner_column, int one_or_two, struct node **attack, struct node **ships2,
+        struct node **destroy, struct node** water, struct node **all_water) {
+
+    int hit_or_not = counter_linked(ships2, inner_row, inner_column);
+    int ship_num = 0, ship_length = 0;
+    struct node* search_result = find(inner_row, inner_column, ships2);
+
+    if(search_result != NULL){
+        ship_num = search_result->ship_num;
+        ship_length = search_result->ship_length;
+    }
+
+    if(search_linked(attack, inner_row, inner_column) == false) {
+        insert_coordinates(inner_row, inner_column, ship_num, ship_length, attack);
+    }
+
+    int check_destroyed = 0;
+    if(hit_or_not != 0){
+        check_destroyed = destroyed_ship(ship_num, ship_length, attack);
+    }
+
+    if(check_destroyed == 1){
+        find_add(ship_num, attack, ships2, destroy);
+        find_add(ship_num, all_water, all_water, water );
+    }
+
+    if(hit_or_not != 0 && one_or_two == 1){
+        find_users(id1, 1, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id1, 1, ship_length, &start1, &playing_users);
+        }
+    }else if(hit_or_not != 0 && one_or_two == 2){
+        find_users(id2, 2, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id2, 2, ship_length, &start1, &playing_users);
+        }
+    }
+
+    return hit_or_not;
+}
+
 void insert_coordinates( int inner_row,int inner_column,int ship_num,int ship_length, struct node **head){
     struct node *link = (struct node*) malloc(sizeof(struct node));
 
@@ -1528,6 +1668,35 @@ void find_users(int key,int one_or_two ,int add_point, struct users** head1, str
         if(current->ID == key){
             //insert_users(current->username, current->points, one_or_two, add);
             current->points = current->points + add_point;
+            if(one_or_two == 1){
+                id1 = current->ID;
+                strcpy(username1, current->username);
+            }
+            else if(one_or_two == 2){
+                id2 = current->ID;
+                strcpy(username2, current->username);
+            }
+        }
+        current = current->next;
+    }
+
+
+}
+
+int rocket_users(int key,int one_or_two , struct users** head1) {
+
+    struct users* current = *head1;
+
+    while(current != NULL) {
+        if(current->ID == key){
+            //insert_users(current->username, current->points, one_or_two, add);
+            if(current->points >= 100){
+                current->points = current->points - 100;
+                return  1;
+            }
+            else{
+                return 0;
+            }
             if(one_or_two == 1){
                 id1 = current->ID;
                 strcpy(username1, current->username);
