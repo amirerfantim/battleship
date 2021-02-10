@@ -41,7 +41,21 @@ struct node *head_atkp2 = NULL; // coordinates that player2 attacked
 struct node *head_desp2 = NULL; // ship coordinates that player 2 destroyed
 struct node *water_p2 = NULL; // water around destroyed ship
 
-/*
+// for play-back player 1
+struct node *h_ships_p1 = NULL; // ship coordinates
+struct node *ha_water_p1 = NULL; // forbidden coordinates
+struct node *h_atk_p1 = NULL; // coordinates that player2 attacked
+struct node *h_des_p1 = NULL; // ship coordinates that player 2 destroyed
+struct node *h_water_p1 = NULL; // water around destroyed ship
+
+// for play-back player 2
+struct node *h_ships_p2 = NULL; // ship coordinates
+struct node *ha_water_p2 = NULL; // forbidden coordinates
+struct node *h_atk_p2 = NULL; // coordinates that player2 attacked
+struct node *h_des_p2 = NULL; // ship coordinates that player 2 destroyed
+struct node *h_water_p2 = NULL; // water around destroyed ship
+
+
 void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
@@ -51,7 +65,8 @@ void printList(struct node **head) {
     }
     printf(" ]");
 }
-*/
+
+
 
 void main_menu();
 void show_main_menu();
@@ -96,14 +111,21 @@ int load_game();
 void insert_users();
 void sort();
 void reverse();
+void reverse_node();
+void list_duplicator();
 void print_users();
 void print_games();
 int length_users();
+void playback();
+void playback_map();
+int playback_attack();
+
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
 struct users *ReadNextUser();
 struct users *ReadUsersIn();
 struct node *find();
+struct node* find_by_pos();
 struct node* delete_1var();
 struct node* delete_2var();
 bool search_linked();
@@ -278,7 +300,15 @@ int load_game(){
 void two_player_game(){
     //get_ship(&head1_p1, &head2_p1);
     //get_ship(&head1_p2, &head2_p2);
+
     cleanup_all();
+
+    list_duplicator(&head1_p1, &h_ships_p1);
+    list_duplicator(&head2_p1, &ha_water_p1);
+    list_duplicator(&head1_p2, &h_ships_p2);
+    list_duplicator(&head2_p2, &ha_water_p2);
+
+
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
@@ -319,6 +349,11 @@ void two_player_game(){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\n%s WON!\nCongratulations!\n", username2);
     }
+    WriteUsersToFile(start1, 1);
+    sleep(4);
+    system("cls");
+    printf("\nNOW THE PLAY BACK!\n");
+    playback();
 
 }
 
@@ -326,7 +361,15 @@ void play_with_bot(){
     int hit_or_not;
     //get_ship(&head1_p1, &head2_p1);
     get_random_ship(&head1_p2, &head2_p2);
+
     cleanup_all();
+
+    list_duplicator(&head1_p1, &h_ships_p1);
+    list_duplicator(&head2_p1, &ha_water_p1);
+    list_duplicator(&head1_p2, &h_ships_p2);
+    list_duplicator(&head2_p2, &ha_water_p2);
+
+
 
     while(head1_p1 != NULL && head1_p2 != NULL) {
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
@@ -368,6 +411,8 @@ void play_with_bot(){
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         printf("\n%s WON!\nCongratulations!\n", username1);
     }
+
+    WriteUsersToFile(start1);
 
 }
 
@@ -605,6 +650,7 @@ void put_ships_menu(char player[],int one_or_two, struct node** ships,struct nod
     if(command == 1){
         system("cls");
         get_random_ship(ships,water);
+
 
     }else if(command == 2){
         system("cls");
@@ -1683,6 +1729,17 @@ void find_users(int key,int one_or_two ,int add_point, struct users** head1, str
 
 }
 
+struct node* find_by_pos(int num, struct node ** head1) {
+    int i = 0;
+    struct node *ptr = *head1;
+
+    while(i < num-1) {
+        ptr = ptr->next;
+        i++;
+    }
+    return ptr;
+}
+
 int rocket_users(int key,int one_or_two , struct users** head1) {
 
     struct users* current = *head1;
@@ -1828,5 +1885,130 @@ void reverse(struct users** head_ref) {
     }
 
     *head_ref = prev;
+}
+
+void reverse_node(struct node** head_ref) {
+    struct node* prev   = NULL;
+    struct node* current = *head_ref;
+    struct node* next;
+
+    while (current != NULL) {
+        next  = current->next;
+        current->next = prev;
+        prev = current;
+        current = next;
+    }
+
+    *head_ref = prev;
+}
+
+void list_duplicator(struct node ** main, struct node **add) {
+
+    struct node *ptr = *main;
+
+    while(ptr != NULL) {
+        insert_coordinates(ptr->row_coor, ptr->column_coor, ptr->ship_num, ptr->ship_length, add);
+        ptr = ptr->next;
+    }
+}
+
+
+// play-back functions
+
+int playback_attack(int pos, int one_or_two, struct node **attack,struct node **playback_atk,
+        struct node **ships2, struct node **destroy,  struct node** water, struct node **all_water) {
+    int inner_row, inner_column;
+
+    struct node *current = find_by_pos(pos,  attack);
+    inner_row = current->row_coor;
+    inner_column = current->column_coor;
+
+    int hit_or_not = counter_linked(ships2, inner_row, inner_column);
+    int ship_num = 0, ship_length = 0;
+    struct node* search_result = find(inner_row, inner_column, ships2);
+
+    if(search_result != NULL){
+        ship_num = search_result->ship_num;
+        ship_length = search_result->ship_length;
+    }
+
+    insert_coordinates(inner_row, inner_column,  ship_num, ship_length, playback_atk);
+
+
+    int check_destroyed = 0;
+    if(hit_or_not != 0){
+        check_destroyed = destroyed_ship(ship_num, ship_length, playback_atk);
+    }
+    if(check_destroyed == 1){
+        find_add(ship_num, playback_atk, ships2, destroy);
+        find_add(ship_num, all_water, all_water, water );
+    }
+    if(hit_or_not != 0 && one_or_two == 1){
+        find_users(id1, 1, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id1, 1, ship_length, &start1, &playing_users);
+        }
+    }else if(hit_or_not != 0 && one_or_two == 2){
+        find_users(id2, 2, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            find_users(id2, 2, ship_length, &start1, &playing_users);
+        }
+    }
+    return hit_or_not;
+}
+
+void playback(){
+    int loop1 = 1,  loop2 = 1;
+
+    while(h_ships_p1 != NULL && h_ships_p2 != NULL) {
+        int hit_or_not  = 1;
+        print_atk_map(&h_atk_p1, &ha_water_p2, &h_des_p2, &h_water_p2);
+        sleep(1);
+        system("cls");
+
+        while(hit_or_not == 1) {
+            hit_or_not = playback_attack(loop1,1, &head_atkp1,&h_atk_p1,  &h_ships_p2, &h_des_p2,
+                                            &h_water_p2, &ha_water_p2);
+
+            print_atk_map(&h_atk_p1, &ha_water_p2, &h_des_p2, &h_water_p2);
+            sleep(1);
+            system("cls");
+            loop1++;
+        }
+
+        if(h_ships_p2 == NULL){
+            break;
+        }
+        hit_or_not = 1;
+        print_atk_map(&h_atk_p2, &h_ships_p1, &h_des_p1, &ha_water_p1);
+        sleep(1);
+        system("cls");
+
+        while(hit_or_not == 1) {
+            hit_or_not = playback_attack(loop2,2, &head_atkp2 ,&h_atk_p2,  &h_ships_p1, &h_des_p1,
+                                         &h_water_p1, &ha_water_p1);
+            loop2++;
+
+            print_atk_map(&h_atk_p2, &h_ships_p1, &h_des_p1, &ha_water_p1);
+            sleep(1);
+            system("cls");
+        }
+
+    }
+
+    if(h_ships_p2 == NULL){
+        print_atk_map(&h_atk_p2, &h_ships_p1, &h_des_p1, &h_water_p1);
+        printf("\n%s WON!\nCongratulations!\n", username1);
+        sleep(3);
+        system("cls");
+    }
+
+    if(h_ships_p1 == NULL){
+        print_atk_map(&h_atk_p1, &h_ships_p2, &h_des_p2, &h_water_p2);
+        printf("\n%s WON!\nCongratulations!\n", username2);
+        sleep(3);
+        system("cls");
+    }
+
 }
 
