@@ -121,6 +121,7 @@ int length_users();
 void playback();
 void playback_map();
 int playback_attack();
+void theme();
 
 struct node *ReadNextFromFile();
 struct node *ReadListIn();
@@ -134,6 +135,7 @@ bool search_linked();
 
 
 int main() {
+    system("color E0");
     srand(time(0));
     system("mkdir data\\users");
 
@@ -414,7 +416,7 @@ void play_with_bot(){
         printf("\n%s WON!\nCongratulations!\n", username1);
     }
 
-    WriteUsersToFile(start1);
+    WriteUsersToFile(start1, 1);
 
     sleep(5);
     system("cls");
@@ -757,12 +759,12 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(3, 2, head1, head2);
     system("cls");
     print_map(7, head1);
-/*
+
     get_coordinates(3, 3, head1, head2);
     system("cls");
     print_map(10, head1);
-    */
-/*
+
+
     get_coordinates(2, 4, head1, head2);
     system("cls");
     print_map(13, head1);
@@ -774,19 +776,28 @@ void get_ship(struct node **head1, struct node **head2){
     get_coordinates(2, 6, head1, head2);
     system("cls");
     print_map(17, head1);
-    */
+
+    get_coordinates(1, 7, head1, head2);
+    system("cls");
+    print_map(18, head1);
+
+    get_coordinates(1, 8, head1, head2);
+    system("cls");
+    print_map(19, head1);
+
+    get_coordinates(1, 9, head1, head2);
+    system("cls");
+    print_map(20, head1);
+
+    get_coordinates(1, 10, head1, head2);
+    system("cls");
+    print_map(21, head1);
 
     //WriteListToFile(head1_p1, 1, 1);
 
     countdown(5);
     system("cls");
 
-/*
-    get_coordinates_p1(1, 7);
-    get_coordinates_p1(1, 8);
-    get_coordinates_p1(1, 9);
-    get_coordinates_p1(1, 10);
-*/
 }
 
 int coor_spliter(int n,int row_col, struct node **head) { // row =1= return row num & col =2= return column num
@@ -1208,7 +1219,6 @@ void get_random_ship(struct node **head1, struct node **head2){
     random_coordinates(4, 1, head1, head2);
     random_coordinates(3, 2, head1, head2);
     random_coordinates(3, 3, head1, head2);
-    /*
     random_coordinates(2, 4, head1, head2);
     random_coordinates(2, 5, head1, head2);
     random_coordinates(2, 6, head1, head2);
@@ -1216,7 +1226,7 @@ void get_random_ship(struct node **head1, struct node **head2){
     random_coordinates(1, 8, head1, head2);
     random_coordinates(1, 9, head1, head2);
     random_coordinates(1, 10, head1, head2);
-     */
+
 
     system("cls");
 }
@@ -2024,6 +2034,10 @@ void playback(){
         system("cls");
     }
 
+
+}
+
+void theme(){
 
 }
 
