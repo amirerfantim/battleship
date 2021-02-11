@@ -57,7 +57,7 @@ struct node *h_des_p2 = NULL; // ship coordinates that player 2 destroyed
 struct node *h_water_p2 = NULL; // water around destroyed ship
 struct node *show_atk_p2 = NULL; // to show attacked coor's one-by-ne
 
-
+/*
 void printList(struct node **head) {
     struct node *ptr = *head;
     printf("\n[ ");
@@ -67,7 +67,7 @@ void printList(struct node **head) {
     }
     printf(" ]");
 }
-
+*/
 
 
 void main_menu();
@@ -145,13 +145,17 @@ int main() {
     reverse(&start1);
 
     system("cls");
-    printf(" BATTLE SHIP\n");
-
+    printf ("\nXXXXX   XXXX  XXXXXX XXXXXX XX     XXXXXX  XXXXX XX  XX XX XXXX\n");
+    printf ("XX  XX XX  XX   XX     XX   XX     XX     XX     XX  XX XX XX  XX\n");
+    printf ("XXXXX  XX  XX   XX     XX   XX     XXXX    XXXX  XXXXXX XX XXXX\n");
+    printf ("XX  XX XXXXXX   XX     XX   XX     XX         XX XX  XX XX XX\n");
+    printf ("XXXXX  XX  XX   XX     XX   XXXXXX XXXXXX XXXXX  XX  XX XX XX\n");
     main_menu();
 
     WriteUsersToFile(start1, 1);
 
 }
+
 
 // bot == 1 || human =+2
 void save_game(){
@@ -394,7 +398,7 @@ void play_with_bot(){
 
         //print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
         hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
-                                        , &water_p1, &head2_p1, 1, &h_atk_p2);
+                , &water_p1, &head2_p1, 1, &h_atk_p2);
         while(hit_or_not == 1){
             hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
                     , &water_p1, &head2_p1, 1, &h_atk_p2);
@@ -432,7 +436,7 @@ void what_player_choose(int one_or_two){
     command = get_command();
     if(command == 1 && one_or_two == 1){
         hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                       &water_p2, &head2_p2, 0, &h_atk_p1);
+                                        &water_p2, &head2_p2, 0, &h_atk_p1);
         system("cls");
         print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
         countdown(2);
@@ -442,9 +446,9 @@ void what_player_choose(int one_or_two){
             printf("\nUse Your Bonus:\n");
             print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             hit_or_not = attack_coordinates(one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                           &water_p2, &head2_p2, 0, &h_atk_p1);
-           system("cls");
-           print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
+                                            &water_p2, &head2_p2, 0, &h_atk_p1);
+            system("cls");
+            print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             countdown(2);
         }
         system("cls");
@@ -475,28 +479,28 @@ void what_player_choose(int one_or_two){
         what_player_choose(one_or_two);
     }
     else if(command == 3){
-            int enough_points;
-            if(one_or_two == 1){
-                enough_points = rocket_users(id1, 1, &start1);
-                if(enough_points == 1){
-                    rocket(one_or_two);
-                }else{
-                    printf("\nNot enough points!\n");
-                    sleep(1);
-                    printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
-                    what_player_choose(1);
-                }
-            }else if(one_or_two == 2){
-                enough_points = rocket_users(id2, 2, &start1);
-                if(enough_points == 1){
-                    rocket(one_or_two);
-                }else{
-                    printf("\nNot enough points!\n");
-                    sleep(1);
-                    printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
-                    what_player_choose(2);
-                }
+        int enough_points;
+        if(one_or_two == 1){
+            enough_points = rocket_users(id1, 1, &start1);
+            if(enough_points == 1){
+                rocket(one_or_two);
+            }else{
+                printf("\nNot enough points!\n");
+                sleep(1);
+                printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
+                what_player_choose(1);
             }
+        }else if(one_or_two == 2){
+            enough_points = rocket_users(id2, 2, &start1);
+            if(enough_points == 1){
+                rocket(one_or_two);
+            }else{
+                printf("\nNot enough points!\n");
+                sleep(1);
+                printf("1. Attack  2. Save  3.Rocket  4. Exit\n");
+                what_player_choose(2);
+            }
+        }
     }
 
     else if(command == 4){
@@ -1239,7 +1243,7 @@ void get_random_ship(struct node **head1, struct node **head2){
 // if head==p1 then ships==p2
 // if rand_or_not == 1 ->random if == 0 ->manual
 int attack_coordinates(int one_or_two, struct node **attack, struct node **ships2, struct node **destroy,
-        struct node** water, struct node **all_water, int rand_or_not, struct node ** playback_atk) {
+                       struct node** water, struct node **all_water, int rand_or_not, struct node ** playback_atk) {
     printf("\nenter coordinate you wanna hit:\n");
     int inner_row, inner_column, points;
 
@@ -1336,7 +1340,7 @@ void rocket(int one_or_two){
 
             for(loop = 1; loop < 11; loop++){
                 hitted = rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                   &water_p2, &head2_p2);
+                                            &water_p2, &head2_p2);
                 if(hitted == 1){
                     break;
                 }
@@ -1351,7 +1355,7 @@ void rocket(int one_or_two){
 
             for(loop = 1; loop < 11; loop++) {
                 hitted = rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
-                                   &water_p1, &head2_p1);
+                                            &water_p1, &head2_p1);
                 if(hitted == 1) {
                     break;
                 }
@@ -1380,7 +1384,7 @@ void rocket(int one_or_two){
 
             for(loop = 1; loop < 11; loop++){
                 hitted = rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
-                                   &water_p2, &head2_p2);
+                                            &water_p2, &head2_p2);
                 if(hitted == 1){
                     break;
                 }
@@ -1395,7 +1399,7 @@ void rocket(int one_or_two){
 
             for(loop = 1; loop < 11; loop++) {
                 hitted = rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
-                                   &water_p1, &head2_p1);
+                                            &water_p1, &head2_p1);
                 if(hitted == 1){
                     break;
                 }
@@ -1424,7 +1428,7 @@ int valid_rocket_coor(int rocket_num){
 };
 
 int rocket_coordinates(int inner_row, int inner_column, int one_or_two, struct node **attack, struct node **ships2,
-        struct node **destroy, struct node** water, struct node **all_water) {
+                       struct node **destroy, struct node** water, struct node **all_water) {
 
     int hit_or_not = counter_linked(ships2, inner_row, inner_column);
     int ship_num = 0, ship_length = 0;
@@ -1988,7 +1992,7 @@ void list_duplicator(struct node ** main, struct node **add) {
 // play-back functions
 
 int playback_attack(int pos, int one_or_two,struct node ** show_atk, struct node **playback_atk,
-        struct node **ships2, struct node **destroy,  struct node** water, struct node **all_water) {
+                    struct node **ships2, struct node **destroy,  struct node** water, struct node **all_water) {
     int inner_row, inner_column;
 
     struct node *current = find_by_pos(pos,  playback_atk);
@@ -2044,7 +2048,7 @@ void playback(){
 
         while(hit_or_not == 1) {
             hit_or_not = playback_attack(loop1,1,&show_atk_p1, &h_atk_p1,  &h_ships_p2, &h_des_p2,
-                                            &h_water_p2, &ha_water_p2);
+                                         &h_water_p2, &ha_water_p2);
             printf("\n%s Turn\n", username1);
             print_atk_map(&show_atk_p1, &h_ships_p2, &h_des_p2, &h_water_p2);
             sleep(1);
@@ -2122,4 +2126,3 @@ void theme(){
     main_menu();
 
 }
-
