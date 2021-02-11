@@ -103,6 +103,7 @@ int counter_linked();
 int counter_shipnum();
 void find_add();
 void find_users();
+int points_to_add();
 void cleanup_list();
 void cleanup_all();
 void two_player_game();
@@ -555,7 +556,10 @@ void main_menu(){
         system("cls");
         main_menu();
 
-    }else if (command1 == 5){
+    }else if(command1 == 5){
+        theme();
+
+    }else if (command1 == 6){
         system("cls");
         printf("\n\n    GOOD BYE :)\n");
         exit(0);
@@ -572,8 +576,9 @@ void show_main_menu(){
            "1. Play with a Friend\n"
            "2. Play with bot\n"
            "3. Load a Game\n"
-           "4. Score Board\n"
-           "5. Exit\n");
+           "4.Score Board\n"
+           "5.Theme\n"
+           "6. Exit\n");
 }
 
 int get_command(){
@@ -1236,7 +1241,7 @@ void get_random_ship(struct node **head1, struct node **head2){
 int attack_coordinates(int one_or_two, struct node **attack, struct node **ships2, struct node **destroy,
         struct node** water, struct node **all_water, int rand_or_not, struct node ** playback_atk) {
     printf("\nenter coordinate you wanna hit:\n");
-    int inner_row, inner_column;
+    int inner_row, inner_column, points;
 
     if(rand_or_not == 0) {
         printf("enter row number: ");
@@ -1287,19 +1292,34 @@ int attack_coordinates(int one_or_two, struct node **attack, struct node **ships
     if(hit_or_not != 0 && one_or_two == 1){
         find_users(id1, 1, 1, &start1, &playing_users);
         if(check_destroyed == 1){
-            find_users(id1, 1, ship_length, &start1, &playing_users);
+            points = points_to_add(ship_length);
+            find_users(id1, 1, points, &start1, &playing_users);
         }
     }else if(hit_or_not != 0 && one_or_two == 2 && rand_or_not == 0){
         find_users(id2, 2, 1, &start1, &playing_users);
         if(check_destroyed == 1){
-            find_users(id2, 2, ship_length, &start1, &playing_users);
+            points = points_to_add(ship_length);
+            find_users(id2, 2, points, &start1, &playing_users);
         }
     }
     return hit_or_not;
 }
 
+int points_to_add(int ship_length){
+    if(ship_length == 1){
+        return 25;
+    } else if(ship_length == 2){
+        return 12;
+    } else if(ship_length == 3){
+        return 8;
+    } else{
+        return 5;
+    }
+}
+
 void rocket(int one_or_two){
-    int command,  rocket_num, loop, tester;
+    static int once_p1 = 0, once_p2 = 0;
+    int command,  rocket_num, loop, tester, hitted;
     printf("\nUse Your Rocket!\n1. Vertical  2. Horizontal\n");
     command = get_command();
     if(command == 1){
@@ -1310,24 +1330,42 @@ void rocket(int one_or_two){
         if(tester == 0){
             rocket(one_or_two);
         }
-        else if(one_or_two == 1){
+        else if(one_or_two == 1 && once_p1 != 1){
+
+            once_p1 = 1;
+
             for(loop = 1; loop < 11; loop++){
-                rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                hitted = rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
                                    &water_p2, &head2_p2);
+                if(hitted == 1){
+                    break;
+                }
             }
             print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             countdown(2);
             system("cls");
 
-        }else if (one_or_two == 2){
+        }else if (one_or_two == 2 && once_p2 != 1){
+
+            once_p2 = 1;
+
             for(loop = 1; loop < 11; loop++) {
-                rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
+                hitted = rocket_coordinates(loop, rocket_num, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
                                    &water_p1, &head2_p1);
+                if(hitted == 1) {
+                    break;
+                }
             }
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
             countdown(2);
             system("cls");
         }
+        else{
+            printf("\n You used Rocket once in this game!\n");
+            printf("\n1. Attack  2. Save 3. Rocket  4. Exit\n");
+            what_player_choose(one_or_two);
+        }
+
     }else if(command == 2){
         printf("enter the row number you wanna hit: ");
         scanf("%d", &rocket_num);
@@ -1336,23 +1374,40 @@ void rocket(int one_or_two){
         if(tester == 0){
             rocket(one_or_two);
         }
-        else if(one_or_two == 1){
+        else if(one_or_two == 1 && once_p1 != 1){
+
+            once_p1 = 1;
+
             for(loop = 1; loop < 11; loop++){
-                rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
+                hitted = rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp1, &head1_p2,&head_desp2,
                                    &water_p2, &head2_p2);
+                if(hitted == 1){
+                    break;
+                }
             }
             print_atk_map(&head_atkp1, &head1_p2, &head_desp2, &water_p2);
             countdown(2);
             system("cls");
 
-        }else if (one_or_two == 2){
+        }else if (one_or_two == 2 && once_p2 != 1){
+
+            once_p2 = 1;
+
             for(loop = 1; loop < 11; loop++) {
-                rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
+                hitted = rocket_coordinates(rocket_num, loop, one_or_two, &head_atkp2, &head1_p1, &head_desp1,
                                    &water_p1, &head2_p1);
+                if(hitted == 1){
+                    break;
+                }
             }
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
             countdown(2);
             system("cls");
+        }
+        else{
+            printf("\n You used Rocket once in this game!\n");
+            printf("\n1. Attack  2. Save 3. Rocket  4. Exit\n");
+            what_player_choose(one_or_two);
         }
     }else{
         printf("\n1. Attack  2. Save 3. Rocket  4. Exit\n");
@@ -2038,6 +2093,33 @@ void playback(){
 }
 
 void theme(){
+    printf("\n    0 = Black       8 = Gray\n"
+           "    1 = Blue        9 = Light Blue\n"
+           "    2 = Green       A = Light Green\n"
+           "    3 = Aqua        B = Light Aqua\n"
+           "    4 = Red         C = Light Red\n"
+           "    5 = Purple      D = Light Purple\n"
+           "    6 = Yellow      E = Light Yellow\n"
+           "    7 = White       F = Bright White\n");
+
+    fflush(stdin);
+    char code[10], command[3];
+
+    strcpy(code, "color ");
+
+    printf("\n enter code of your background: ");
+    scanf("%s", command);
+    strcat(code, command);
+
+    fflush(stdin);
+
+    printf("\n enter code of your text: ");
+    scanf("%s", command);
+    strcat(code, command);
+
+    system(code);
+    system("cls");
+    main_menu();
 
 }
 
