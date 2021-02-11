@@ -1430,7 +1430,7 @@ int valid_rocket_coor(int rocket_num){
 int rocket_coordinates(int inner_row, int inner_column, int one_or_two, struct node **attack, struct node **ships2,
                        struct node **destroy, struct node** water, struct node **all_water) {
 
-    int hit_or_not = counter_linked(ships2, inner_row, inner_column);
+    int hit_or_not = counter_linked(ships2, inner_row, inner_column), points;
     int ship_num = 0, ship_length = 0;
     struct node* search_result = find(inner_row, inner_column, ships2);
 
@@ -1456,11 +1456,13 @@ int rocket_coordinates(int inner_row, int inner_column, int one_or_two, struct n
     if(hit_or_not != 0 && one_or_two == 1){
         find_users(id1, 1, 1, &start1, &playing_users);
         if(check_destroyed == 1){
+            points = points_to_add(ship_length);
             find_users(id1, 1, ship_length, &start1, &playing_users);
         }
     }else if(hit_or_not != 0 && one_or_two == 2){
         find_users(id2, 2, 1, &start1, &playing_users);
         if(check_destroyed == 1){
+            points = points_to_add(ship_length);
             find_users(id2, 2, ship_length, &start1, &playing_users);
         }
     }
@@ -1936,6 +1938,10 @@ void sort(struct users **head) {
                 tempData = current->points;
                 current->points = next->points;
                 next->points = tempData;
+
+                tempData = current->ID;
+                current->ID = next->ID;
+                next->ID = tempData;
 
                 strcpy(tempname, current->username);
                 strcpy(current->username, next->username);
