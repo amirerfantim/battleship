@@ -369,7 +369,7 @@ void two_player_game(){
 void play_with_bot(){
     int hit_or_not;
     //get_ship(&head1_p1, &head2_p1);
-    get_random_ship(&head1_p2, &head2_p2);
+    //get_random_ship(&head1_p2, &head2_p2);
 
     cleanup_all();
 
@@ -531,6 +531,7 @@ void main_menu(){
         system("cls");
         players_menu("Player",1,&head1_p1, &head2_p1);
         g_bot_or_human = 1;
+        get_random_ship(&head1_p2, &head2_p2);
 
         play_with_bot();
 
