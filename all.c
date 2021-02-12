@@ -90,6 +90,7 @@ int rocket_coordinates();
 int rocket_users();
 void insert_coordinates();
 void random_coordinates();
+int bot_atk();
 void get_random_ship();
 void get_ship();
 int destroyed_ship();
@@ -102,6 +103,7 @@ int counter_linked();
 int counter_shipnum();
 void find_add();
 void find_users();
+void del_users();
 int points_to_add();
 void cleanup_list();
 void cleanup_all();
@@ -365,10 +367,10 @@ void two_player_game(){
 
 }
 
-void play_with_bot(){
+void play_with_bot(int difficulty){
     int hit_or_not;
     //get_ship(&head1_p1, &head2_p1);
-    get_random_ship(&head1_p2, &head2_p2);
+    //get_random_ship(&head1_p2, &head2_p2);
 
     cleanup_all();
 
@@ -396,18 +398,65 @@ void play_with_bot(){
         }
 
         //print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
-                , &water_p1, &head2_p1, 1, &h_atk_p2);
-        while(hit_or_not == 1){
-            hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1
-                    , &water_p1, &head2_p1, 1, &h_atk_p2);
+        if(difficulty == 1) {
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+
+            hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1,
+                                            &water_p1, &head2_p1, 1, &h_atk_p2);
+            while (hit_or_not == 1) {
+                hit_or_not = attack_coordinates(2, &head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 1,
+                                                &h_atk_p2);
+                system("cls");
+                print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+                countdown(2);
+            }
             system("cls");
             print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+
+        }else if(difficulty == 2){
+
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+
+            hit_or_not = bot_atk(2, &head_atkp2, &head1_p1, &head_desp1,
+                                            &water_p1, &head2_p1, 3, &h_atk_p2);
+            while (hit_or_not == 1) {
+                hit_or_not = bot_atk(2, &head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 3,
+                                                &h_atk_p2);
+                system("cls");
+                print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+                countdown(2);
+            }
+            system("cls");
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+
+        }else if(difficulty == 3){
+
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
+
+            hit_or_not = bot_atk(2, &head_atkp2, &head1_p1, &head_desp1,
+                                 &water_p1, &head2_p1, 5, &h_atk_p2);
+            while (hit_or_not == 1) {
+                hit_or_not = bot_atk(2, &head_atkp2, &head1_p1, &head_desp1, &water_p1, &head2_p1, 5,
+                                     &h_atk_p2);
+                system("cls");
+                print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+                countdown(2);
+            }
+            system("cls");
+            print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
+            countdown(2);
+            system("cls");
         }
-        system("cls");
-        print_atk_map(&head_atkp2, &head1_p1, &head_desp1, &water_p1);
-        countdown(2);
-        system("cls");
     }
 
     if(head1_p1 == NULL){
@@ -530,8 +579,11 @@ void main_menu(){
         system("cls");
         players_menu("Player",1,&head1_p1, &head2_p1);
         g_bot_or_human = 1;
+        get_random_ship(&head1_p2, &head2_p2);
 
-        play_with_bot();
+        printf("choose BOT level:  1. Easy  2. Medium  3. Extreme\n");
+        int command3 = get_command();
+        play_with_bot(command3);
 
     }else if (command1 == 3){
         system("cls");
@@ -542,7 +594,7 @@ void main_menu(){
 
         if(bot_or_human == 1) {
             g_bot_or_human = 1;
-            play_with_bot();
+            play_with_bot(1);
         }else{
             g_bot_or_human = 2;
             two_player_game();
@@ -1307,6 +1359,76 @@ int attack_coordinates(int one_or_two, struct node **attack, struct node **ships
     }
     return hit_or_not;
 }
+
+int bot_atk(int one_or_two, struct node **attack, struct node **ships2, struct node **destroy,
+                       struct node** water, struct node **all_water,int difficulty, struct node ** playback_atk) {
+    printf("\nenter coordinate you wanna hit:\n");
+    int inner_row, inner_column, points, rand_num;
+
+
+    inner_row = (rand() % row) + 1;
+    inner_column = (rand() % column) +1;
+    rand_num = (rand() % 10) +1;
+
+    int hit_or_not = counter_linked(ships2, inner_row, inner_column);
+
+    if(rand_num <= difficulty){
+        while(hit_or_not != 1){
+            inner_row = (rand() % row) + 1;
+            inner_column = (rand() % column) +1;
+            hit_or_not = counter_linked(ships2, inner_row, inner_column);
+        }
+    }
+
+    int ship_num = 0, ship_length = 0;
+    struct node* search_result = find(inner_row, inner_column, ships2);
+
+    if(search_result != NULL){
+        ship_num = search_result->ship_num;
+        ship_length = search_result->ship_length;
+    }
+
+    if(inner_row <= 10 && inner_row > 0 && inner_column <= 10 && inner_column > 0) {
+        if(search_linked(attack, inner_row, inner_column) == false) {
+            insert_coordinates(inner_row, inner_column, ship_num, ship_length, attack);
+            insert_coordinates(inner_row, inner_column, ship_num, ship_length, playback_atk);
+        }
+        else{
+            printf("\nYou've already hit this coordinate...\nTry Again\n\n");
+            bot_atk(one_or_two,attack, ships2, destroy, water, all_water, difficulty, playback_atk);
+        }
+    }
+
+
+    else{
+        printf("\nyou entered invalid inputs!! :)\nTry Again...\n\n");
+        bot_atk(one_or_two, attack, ships2, destroy, water, all_water, difficulty, playback_atk);
+    }
+
+    int check_destroyed = 0;
+    if(hit_or_not != 0){
+        check_destroyed = destroyed_ship(ship_num, ship_length, attack);
+    }
+    if(check_destroyed == 1){
+        find_add(ship_num, attack, ships2, destroy);
+        find_add(ship_num, all_water, all_water, water );
+    }
+    if(hit_or_not != 0 && one_or_two == 1){
+        find_users(id1, 1, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            points = points_to_add(ship_length);
+            find_users(id1, 1, points, &start1, &playing_users);
+        }
+    }else if(hit_or_not != 0 && one_or_two == 2 ){
+        find_users(id2, 2, 1, &start1, &playing_users);
+        if(check_destroyed == 1){
+            points = points_to_add(ship_length);
+            find_users(id2, 2, points, &start1, &playing_users);
+        }
+    }
+    return hit_or_not;
+}
+
 
 int points_to_add(int ship_length){
     if(ship_length == 1){
